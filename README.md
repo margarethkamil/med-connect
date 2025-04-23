@@ -1,0 +1,196 @@
+# Doctor Booking Application
+
+A modern, production-ready web application for booking appointments with doctors, built with **React**, **TypeScript**, and **Vite**.
+
+**Key Frontend Highlights:**
+- **State Management with Zustand:** Efficient, scalable, and minimal state management using Zustand for both doctors and appointments.
+- **Responsive Design:** Fully responsive UI, optimized for all devices (mobile, tablet, desktop) using Tailwind CSS and custom breakpoints.
+- **UI/UX Excellence:** Clean, intuitive, and accessible user interfaces with a focus on user experience and usability best practices.
+- **Component-Driven Architecture:** Modular, reusable React components for maintainability and scalability.
+- **Modern Frontend Best Practices:** Type safety, code splitting, lazy loading, hooks, and clear separation of concerns throughout the codebase.
+- **Robust Error Handling:** User-friendly error messages and loading states for all asynchronous operations.
+
+## Project Structure
+
+```
+doctor-booking/
+├── public/                  # Static assets
+├── src/
+│   ├── api/                 # API client for backend communication
+│   ├── components/          # Reusable React components (UI, modals, lists, etc.)
+│   ├── pages/               # Top-level pages (Doctors, Appointments, Admin, etc.)
+│   ├── store/               # Zustand stores for state management
+│   ├── types/               # TypeScript type definitions
+│   ├── App.tsx              # Main app layout and routing
+│   ├── main.tsx             # App entry point
+│   └── routes.tsx           # Route definitions
+├── README.md
+├── package.json
+└── ... (config and environment files)
+```
+
+## Features
+
+### User Features
+- Browse available doctors with filtering and search capabilities
+- View doctor details including specialties, locations, ratings, and fees
+- Book appointments with doctors on available dates and times
+- Manage and view upcoming appointments
+- Cancel or reschedule existing appointments
+
+### Admin Features
+- Admin dashboard with calendar view of all appointments
+- Manage doctors (add, edit, delete)
+- View and manage all appointments in the system
+- Filter appointments by status and doctor
+
+## Authentication
+
+The application uses a simple email-based authentication system:
+- User authentication via email
+- Role-based access (admin vs regular user)
+- Protected routes requiring authentication
+
+## API Endpoints
+
+The application uses the following API endpoints:
+
+### Doctor Endpoints
+- `GET /doctors` - Get all doctors (optional query param: `include_availability=true`)
+- `GET /doctors/:id` - Get details for a specific doctor
+- `GET /doctors/:id/availability` - Get availability slots for a specific doctor
+- `POST /doctors` - Create a new doctor (admin only)
+- `PUT /doctors/:id` - Update doctor details (admin only)
+- `DELETE /doctors/:id` - Delete a doctor (admin only)
+
+### Appointment Endpoints
+- `GET /appointments/user/:userId` - Get appointments for a specific user
+- `GET /appointments/:id` - Get details for a specific appointment
+- `GET /appointments/available/:doctorId/:dateTime` - Check if a slot is available
+- `GET /appointments/admin` - Get all appointments (admin only, supports pagination)
+- `POST /appointments` - Create a new appointment
+- `PUT /appointments/:id/status` - Update appointment status
+- `DELETE /appointments/:id` - Cancel/delete an appointment
+
+## Data Structures
+
+### Doctor
+```typescript
+interface Doctor {
+  id: string;
+  name: string;
+  specialty: string;
+  photo?: string;
+  bio?: string;
+  rating?: number;
+  reviewCount?: number;
+  location?: string;
+  availability?: string[]; // ISO datetime strings for available days
+  email?: string;
+  phone?: string;
+  fee?: number;
+  createdAt?: string;
+}
+```
+
+Example Doctor Object:
+```javascript
+{
+  id: "3nfGzWsJ8m7k2LizZ6Sc",
+  name: "Dr. John Brown",
+  specialty: "Oncology",
+  location: "San Antonio",
+  bio: "This is the Bio and can be modified.",
+  photo: "https://randomuser.me/api/portraits/men/38.jpg",
+  rating: 4.4,
+  email: "johnbrown@mail.com",
+  phone: "88888888",
+  fee: 55,
+  createdAt: "2025-04-23T00:14:16.998Z",
+  availability: [
+    "2025-04-25T08:00:00Z",
+    "2025-04-26T08:00:00Z",
+    "2025-04-27T08:00:00Z",
+    // More dates...
+  ]
+}
+```
+
+### Appointment
+```typescript
+interface Appointment {
+  id: string;
+  doctorId: string;
+  patientId?: string;
+  patientName: string;
+  patientEmail: string;
+  patientPhone: string;
+  date: string;
+  time: string;
+  reason?: string;
+  status: 'confirmed' | 'pending' | 'cancelled';
+  dateTime?: string;
+  doctorName?: string;
+  createdAt: string;
+  updatedAt?: string;
+}
+```
+
+### Booking Request
+```typescript
+interface BookingRequest {
+  doctorId: string;
+  patientName: string;
+  patientEmail: string;
+  patientPhone: string;
+  date: string;
+  time: string;
+  dateTime: string;
+  reason?: string;
+  userId: string;
+  status?: 'confirmed' | 'pending' | 'cancelled';
+}
+```
+
+## Getting Started
+
+1. Clone the repository
+2. Install dependencies: `npm install`
+3. Start the development server: `npm run dev`
+4. Open your browser to the local development URL
+
+## Backend
+
+The application is fully functional and deployed online, using a Firebase backend with the following base URL:
+Developed 
+`https://us-central1-doctor-booking-backend-5c6aa.cloudfunctions.net/api`
+
+## Doctor Booking Backend – Tech Stack & Architecture
+
+**Main Technologies:**
+- **Node.js** – JavaScript runtime powering the backend logic.
+- **Express.js** – Robust web framework for handling HTTP requests and routing.
+- **Firebase Cloud Functions** – Serverless deployment for scalable, managed API hosting.
+- **Firebase Firestore** – NoSQL database for storing doctors, appointments, and users.
+- **Firebase Admin SDK** – Secure server-side access to Firestore and other Firebase services.
+
+**Key Features:**
+- RESTful API for managing doctors, appointments, and availability.
+- Appointment booking, cancellation, and status management.
+- Admin endpoints for listing and filtering all appointments.
+- CORS enabled for seamless frontend-backend communication.
+- Pagination and filtering support for large datasets.
+- Firestore composite indexes for efficient queries.
+
+**Project Structure:**
+- `functions/index.js` – Main entry point, Express app, and Cloud Function export.
+- `functions/models/` – Data access and business logic for doctors and appointments.
+- `functions/controllers/` – Request handling and response formatting.
+- `functions/routes/` – (Optional) Route definitions for modularity.
+- `firestore.indexes.json` – Firestore composite index definitions.
+
+**Deployment:**
+- Deployed as a single Cloud Function (`api`) using the Firebase CLI.
+---
+
+**Developed by Margareth Ortiz**

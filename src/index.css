@@ -1,0 +1,96 @@
+@import "tailwindcss";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* DatePicker custom styles */
+.react-datepicker-wrapper {
+  width: 100%;
+}
+
+.react-datepicker__day--selected {
+  background-color: #2563eb !important; /* blue-600 */
+}
+
+.react-datepicker__day--keyboard-selected {
+  background-color: #93c5fd !important; /* blue-300 */
+}
+
+.react-datepicker__day--disabled {
+  color: #d1d5db !important; /* gray-300 */
+}
+
+.react-datepicker__header {
+  background-color: #f3f4f6 !important; /* gray-100 */
+}
+
+.react-datepicker__current-month,
+.react-datepicker__day-name {
+  color: #1f2937 !important; /* gray-800 */
+}
+
+.react-datepicker__navigation:focus,
+.react-datepicker__day:focus,
+.react-datepicker__day--selected:focus {
+  outline: 2px solid #3b82f6 !important; /* blue-500 */
+  outline-offset: 2px;
+}
+
+/* Responsive calendar for mobile */
+@media (max-width: 640px) {
+  .responsive-calendar {
+    width: 100% !important;
+    max-width: 320px !important;
+  }
+  
+  .react-datepicker__month-container {
+    width: 100% !important;
+  }
+  
+  .react-datepicker__day {
+    width: 2rem !important;
+    height: 2rem !important;
+    line-height: 2rem !important;
+    margin: 0.1rem !important;
+  }
+  
+  .react-datepicker__day-name {
+    width: 2rem !important;
+    margin: 0.1rem !important;
+  }
+}
+
+/* Time slot button styles */
+.time-slot-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: 0.5rem;
+}
+
+/* Time slot hover effects */
+.time-slot-button:not(:disabled):hover {
+  transform: translateY(-2px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Tooltip styles */
+[title] {
+  position: relative;
+}
+
+[title]:hover::after {
+  content: attr(title);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  z-index: 10;
+  pointer-events: none;
+}
