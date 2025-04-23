@@ -7,7 +7,6 @@ import { useDoctorStore } from '../store/doctorStore';
 import { Appointment } from '../types/appointment';
 import { getAllAppointments } from '../api/client';
 import { trackCrudEvents } from '../services/analytics';
-import AdminNavbar from '../components/AdminNavbar';
 
 // Panama time zone
 const TIME_ZONE = 'America/Panama';
@@ -431,7 +430,6 @@ const AdminCalendar: React.FC = () => {
 
   return (
     <div className="container mx-auto px-4 py-6 max-w-6xl">
-      <AdminNavbar />
       
       <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-2">
         <div className="text-center sm:text-left">

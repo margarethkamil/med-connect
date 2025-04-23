@@ -6,7 +6,6 @@ import { Doctor } from '../types/doctor';
 import { trackCrudEvents } from '../services/analytics';
 import { useSeo } from '../services/useSeo';
 import { seoConfigs } from '../services/seo';
-import AdminNavbar from '../components/AdminNavbar';
 
 const AdminDoctors: React.FC = () => {
   // Apply SEO metadata for the admin doctors page
@@ -198,7 +197,6 @@ const AdminDoctors: React.FC = () => {
   if (loading && !refreshing && doctors.length === 0) {
     return (
       <div className="container mx-auto px-4 py-6 max-w-6xl">
-        <AdminNavbar />
         <div className="py-8 text-center">
           <svg className="mx-auto animate-spin h-10 w-10 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
@@ -212,7 +210,6 @@ const AdminDoctors: React.FC = () => {
 
   return (
     <div className="container mx-auto px-4 py-6 max-w-6xl">
-      <AdminNavbar />
       
       <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-2">
         <h1 className="text-2xl font-bold text-gray-900 text-center sm:text-left">Doctor Management</h1>

@@ -7,7 +7,6 @@ import { format } from 'date-fns';
 import { useSeo } from '../services/useSeo';
 import { seoConfigs } from '../services/seo';
 import { Link } from 'react-router-dom';
-import AdminNavbar from '../components/AdminNavbar';
 
 // Patient interface for the API
 interface PatientData {
@@ -370,7 +369,6 @@ const AdminPatients: React.FC = () => {
 
   return (
     <div className="container mx-auto px-4 py-6 max-w-6xl">
-      <AdminNavbar />
 
       <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-2">
         <h1 className="text-2xl font-bold text-gray-900 text-center sm:text-left">Patient Management</h1>
