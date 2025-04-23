@@ -64,6 +64,11 @@ const BookingModal: React.FC<BookingModalProps> = ({ doctor, isOpen, onClose }) 
     reason: ''
   });
   
+  // Add a helper to get the user email
+  const getUserEmail = (): string => {
+    return localStorage.getItem('userId') || '';
+  };
+  
   // Fetch real availability data when the modal is opened
   useEffect(() => {
     if (isOpen && doctor && doctor.id) {
@@ -77,6 +82,13 @@ const BookingModal: React.FC<BookingModalProps> = ({ doctor, isOpen, onClose }) 
       }
     }
   }, [isOpen, doctor?.id, doctor?.availability, fetchDoctorAvailabilities, setDoctorAvailability]);
+  
+  // Add this effect after the other useEffects
+  useEffect(() => {
+    if (isOpen) {
+      setFormData(prev => ({ ...prev, email: getUserEmail() }));
+    }
+  }, [isOpen]);
   
   // Format date to readable string
   const formatDateToString = (date: Date): string => {
@@ -804,7 +816,8 @@ const BookingModal: React.FC<BookingModalProps> = ({ doctor, isOpen, onClose }) 
                 value={formData.email}
                 onChange={handleInputChange}
                 required
-                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2"
+                readOnly
+                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 bg-gray-100 cursor-not-allowed"
               />
             </div>
             
