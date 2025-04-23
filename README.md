@@ -233,3 +233,34 @@ The application is fully functional and deployed online, using a Firebase backen
 ---
 
 **Developed by Margareth Ortiz**
+
+## AI-Assisted Development
+
+AI tools were used to enhance the development process of this project:
+
+- **ChatGPT** was used to:
+  - Refine the content and structure of the `README.md` for clarity and professionalism.
+  - Provide code suggestions and assist in debugging throughout development.
+  - Evaluate different project structures by referencing official documentation and community best practices.
+
+- **Cursor** and **ChatGPT** together helped:
+  - Streamline the workflow.
+  - Ensure better code organization and documentation quality.
+  - Understand requirements using the latest information by leveraging [Cursor](https://www.cursor.so/) for up-to-date context and resources.
+
+## Known Limitations & Next Steps
+
+**Known Limitations:**
+- No support for recurring appointments or appointment reminders.
+- Basic authentication (email only); no OAuth or multi-factor authentication.
+- No payment integration for booking or doctor fees.
+- Admin features are limited.
+
+**Next Steps / Future Improvements:**
+- Add support for appointment reminders and notifications (email/SMS).
+- Integrate payment processing for doctor fees.
+- Enhance authentication with OAuth and multi-factor support.
+- Expand admin dashboard with analytics and reporting.
+- Improve accessibility and add localization support.
+- Implement user reviews and doctor ratings.
+- Add support for recurring appointments.
