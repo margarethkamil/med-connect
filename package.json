@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build" ,
+    "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
@@ -38,6 +38,6 @@
     "tailwindcss": "^4.1.4",
     "typescript": "~5.7.2",
     "typescript-eslint": "^8.26.1",
-    "vite": "^6.3.1"
+    "vite": "^6.3.2"
   }
 }
