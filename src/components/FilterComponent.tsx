@@ -10,289 +10,213 @@ const FilterComponent: React.FC = () => {
   const filterBySpecialty = useDoctorStore(state => state.filterBySpecialty);
   const filterByAvailability = useDoctorStore(state => state.filterByAvailability);
   const resetFilters = useDoctorStore(state => state.resetFilters);
-  
-  // For mobile view, track if filters are expanded
-  const [filtersExpanded, setFiltersExpanded] = useState(false);
-  
-  // Track which filter section is open in dropdown
-  const [openFilterDropdown, setOpenFilterDropdown] = useState<string | null>(null);
-  
-  // Track selected specialties locally for multi-select
-  const [localSelectedSpecialties, setLocalSelectedSpecialties] = useState<string[]>(selectedSpecialties);
-  
-  // Update local state when store state changes, but with a ref to prevent infinite loops
+
+  const [specialtiesOpen, setSpecialtiesOpen] = useState(false);
+  const [availabilityOpen, setAvailabilityOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Check if we're on mobile
   useEffect(() => {
-    // Only update if they're actually different (prevents circular updates)
-    if (JSON.stringify(localSelectedSpecialties) !== JSON.stringify(selectedSpecialties)) {
-      setLocalSelectedSpecialties(selectedSpecialties);
-    }
-  }, [selectedSpecialties]);
-  
-  // Handle specialty toggle - memoized to prevent recreating on each render
-  const handleSpecialtyToggle = useCallback((specialty: string) => {
-    setLocalSelectedSpecialties(prev => {
-      let newSelection: string[];
-      
-      if (prev.includes(specialty)) {
-        // Remove if already selected
-        newSelection = prev.filter(s => s !== specialty);
-      } else {
-        // Add if not selected
-        newSelection = [...prev, specialty];
+    const checkIsMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkIsMobile();
+    window.addEventListener('resize', checkIsMobile);
+    
+    return () => {
+      window.removeEventListener('resize', checkIsMobile);
+    };
+  }, []);
+
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (!target.closest('.specialty-dropdown') && !target.closest('.specialty-button')) {
+        setSpecialtiesOpen(false);
       }
-      
-      // Call store update ONLY if the selection has changed
-      if (JSON.stringify(newSelection) !== JSON.stringify(selectedSpecialties)) {
-        filterBySpecialty(newSelection);
+      if (!target.closest('.availability-dropdown') && !target.closest('.availability-button')) {
+        setAvailabilityOpen(false);
       }
-      
-      return newSelection;
-    });
-  }, [filterBySpecialty, selectedSpecialties]);
-  
-  // Handle availability change
-  const handleAvailabilityChange = useCallback((availability: AvailabilityFilter) => {
-    filterByAvailability(availability);
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  // Toggle specialty selection
+  const toggleSpecialty = useCallback((specialty: string) => {
+    const newSpecialties = selectedSpecialties.includes(specialty)
+      ? selectedSpecialties.filter((s) => s !== specialty)
+      : [...selectedSpecialties, specialty];
+    
+    filterBySpecialty(newSpecialties);
+  }, [selectedSpecialties, filterBySpecialty]);
+
+  // Handle availability selection
+  const handleAvailabilityChange = useCallback((availability: string) => {
+    filterByAvailability(availability as AvailabilityFilter);
+    setAvailabilityOpen(false);
   }, [filterByAvailability]);
-  
-  // Handle reset filters
-  const handleResetFilters = useCallback(() => {
-    resetFilters();
-    setLocalSelectedSpecialties([]);
-  }, [resetFilters]);
-  
-  // Toggle dropdown menu
-  const toggleDropdown = useCallback((dropdown: string) => {
-    setOpenFilterDropdown(prev => prev === dropdown ? null : dropdown);
-  }, []);
-  
-  // For mobile view
-  const toggleFilters = useCallback(() => {
-    setFiltersExpanded(prev => !prev);
-  }, []);
-  
+
   return (
-    <div className="px-4 py-3">
-      {/* Desktop Filter Layout */}
-      <div className="hidden md:block">
-        <div className="flex flex-wrap items-center justify-between">
-          <div className="flex items-center space-x-4">
-            {/* Specialty Filter Dropdown */}
-            <div className="relative">
-              <button
-                onClick={() => toggleDropdown('specialty')}
-                className="px-4 py-2 text-sm bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none flex items-center"
+    <div className="py-4 px-5">
+      <div className="flex flex-col md:flex-row md:items-center justify-between">
+        <h2 className="text-lg font-medium text-gray-800 mb-3 md:mb-0">Filter Doctors</h2>
+        
+        <div className="flex flex-col space-y-3 sm:flex-row sm:space-y-0 sm:space-x-3">
+          {/* Specialty Filter */}
+          <div className="relative specialty-dropdown">
+            <button
+              className="specialty-button w-full sm:w-auto bg-white border border-gray-300 rounded-lg px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center justify-between"
+              onClick={() => setSpecialtiesOpen(!specialtiesOpen)}
+            >
+              <span>Specialty</span>
+              <span className="ml-2 bg-blue-100 text-blue-800 py-0.5 px-2 rounded-full text-xs">
+                {selectedSpecialties.length || 'Any'}
+              </span>
+              <svg
+                className={`ml-2 h-5 w-5 text-gray-400 transition-transform ${
+                  specialtiesOpen ? 'transform rotate-180' : ''
+                }`}
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+                aria-hidden="true"
               >
-                <span className="mr-1 font-medium">Specialty</span>
-                {selectedSpecialties.length > 0 && (
-                  <span className="bg-blue-100 text-blue-800 text-xs font-semibold ml-1.5 px-2 py-0.5 rounded-full">
-                    {selectedSpecialties.length}
-                  </span>
-                )}
-                <svg className="ml-2 w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-              
-              {openFilterDropdown === 'specialty' && (
-                <div className="absolute left-0 mt-2 w-60 bg-white border border-gray-300 rounded-md shadow-lg z-10">
-                  <div className="p-3 max-h-60 overflow-y-auto">
-                    <div className="flex justify-between items-center mb-2">
-                      <h3 className="text-sm font-medium text-gray-700">Select Specialties</h3>
-                      {selectedSpecialties.length > 0 && (
-                        <button
-                          onClick={() => filterBySpecialty([])}
-                          className="text-xs text-blue-600 hover:text-blue-800"
-                        >
-                          Clear
-                        </button>
-                      )}
-                    </div>
-                    <div className="space-y-2">
-                      {specialties.map(specialty => (
-                        <div key={specialty} className="flex items-center">
-                          <input
-                            type="checkbox"
-                            id={`specialty-dropdown-${specialty}`}
-                            checked={localSelectedSpecialties.includes(specialty)}
-                            onChange={() => handleSpecialtyToggle(specialty)}
-                            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                          />
-                          <label
-                            htmlFor={`specialty-dropdown-${specialty}`}
-                            className="ml-2 block text-sm text-gray-700"
-                          >
-                            {specialty}
-                          </label>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
+                <path
+                  fillRule="evenodd"
+                  d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </button>
             
-            {/* Availability Filter Dropdown */}
-            <div className="relative">
-              <button
-                onClick={() => toggleDropdown('availability')}
-                className="px-4 py-2 text-sm bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none flex items-center"
-              >
-                <span className="mr-1 font-medium">Availability</span>
-                {selectedAvailability !== 'any' && (
-                  <span className="bg-green-100 text-green-800 text-xs font-semibold ml-1.5 px-2 py-0.5 rounded-full">1</span>
-                )}
-                <svg className="ml-2 w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-              
-              {openFilterDropdown === 'availability' && (
-                <div className="absolute left-0 mt-2 w-52 bg-white border border-gray-300 rounded-md shadow-lg z-10">
-                  <div className="p-3">
-                    <div className="flex justify-between items-center mb-2">
-                      <h3 className="text-sm font-medium text-gray-700">Availability</h3>
-                      {selectedAvailability !== 'any' && (
-                        <button
-                          onClick={() => handleAvailabilityChange('any')}
-                          className="text-xs text-blue-600 hover:text-blue-800"
-                        >
-                          Clear
-                        </button>
-                      )}
-                    </div>
-                    <div className="space-y-2">
-                      {[
-                        { value: 'any', label: 'Any Time' },
-                        { value: 'today', label: 'Available Today' },
-                        { value: 'this-week', label: 'Available This Week' },
-                        { value: 'next-available', label: 'Next Available' }
-                      ].map(option => (
-                        <div key={option.value} className="flex items-center">
-                          <input
-                            type="radio"
-                            id={`availability-dropdown-${option.value}`}
-                            name="availability-dropdown"
-                            checked={selectedAvailability === option.value}
-                            onChange={() => handleAvailabilityChange(option.value as AvailabilityFilter)}
-                            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
-                          />
-                          <label
-                            htmlFor={`availability-dropdown-${option.value}`}
-                            className="ml-2 block text-sm text-gray-700"
-                          >
-                            {option.label}
-                          </label>
-                        </div>
-                      ))}
-                    </div>
+            {specialtiesOpen && (
+              <div className="absolute z-10 mt-2 w-64 rounded-lg bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                <div className="p-2">
+                  <div className="p-2 border-b border-gray-100">
+                    <h3 className="text-sm font-medium text-gray-900">Select specialties</h3>
+                  </div>
+                  <div className="mt-2 max-h-60 overflow-y-auto">
+                    {specialties.map((specialty) => (
+                      <div
+                        key={specialty}
+                        className="flex items-center px-3 py-2 hover:bg-gray-50 rounded-md cursor-pointer"
+                        onClick={() => toggleSpecialty(specialty)}
+                      >
+                        <input
+                          type="checkbox"
+                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                          checked={selectedSpecialties.includes(specialty)}
+                          onChange={() => {}}
+                        />
+                        <label className="ml-3 text-sm text-gray-700 cursor-pointer w-full">
+                          {specialty}
+                        </label>
+                      </div>
+                    ))}
                   </div>
                 </div>
-              )}
-            </div>
+              </div>
+            )}
           </div>
-          
-          {/* Reset Filters Button */}
+
+          {/* Availability Filter */}
+          <div className="relative availability-dropdown">
+            <button
+              className="availability-button w-full sm:w-auto bg-white border border-gray-300 rounded-lg px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center justify-between"
+              onClick={() => setAvailabilityOpen(!availabilityOpen)}
+            >
+              <span>Availability</span>
+              <span className="ml-2 bg-green-100 text-green-800 py-0.5 px-2 rounded-full text-xs">
+                {selectedAvailability === 'any'
+                  ? 'Any'
+                  : selectedAvailability === 'today'
+                  ? 'Today'
+                  : selectedAvailability === 'this-week'
+                  ? 'This Week'
+                  : 'Next Available'}
+              </span>
+              <svg
+                className={`ml-2 h-5 w-5 text-gray-400 transition-transform ${
+                  availabilityOpen ? 'transform rotate-180' : ''
+                }`}
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+                aria-hidden="true"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </button>
+            
+            {availabilityOpen && (
+              <div className="absolute z-10 mt-2 w-56 rounded-lg bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                <div className="p-2">
+                  <div className="p-2 border-b border-gray-100">
+                    <h3 className="text-sm font-medium text-gray-900">Select availability</h3>
+                  </div>
+                  <div className="mt-1">
+                    {[
+                      { id: 'any', label: 'Any' },
+                      { id: 'today', label: 'Available Today' },
+                      { id: 'this-week', label: 'Available This Week' },
+                      { id: 'next-available', label: 'Next Available' },
+                    ].map((option) => (
+                      <div
+                        key={option.id}
+                        className="flex items-center px-3 py-2 hover:bg-gray-50 rounded-md cursor-pointer"
+                        onClick={() => handleAvailabilityChange(option.id)}
+                      >
+                        <input
+                          type="radio"
+                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                          checked={selectedAvailability === option.id}
+                          onChange={() => {}}
+                        />
+                        <label className="ml-3 text-sm text-gray-700 cursor-pointer w-full">
+                          {option.label}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Reset Filters */}
           {(selectedSpecialties.length > 0 || selectedAvailability !== 'any') && (
             <button
-              onClick={handleResetFilters}
-              className="text-sm text-gray-500 hover:text-gray-700 flex items-center"
+              className="text-sm text-blue-600 hover:text-blue-800 font-medium flex items-center"
+              onClick={resetFilters}
             >
-              <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-4 w-4 mr-1"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                />
               </svg>
-              Clear All Filters
+              Reset filters
             </button>
           )}
         </div>
-      </div>
-      
-      {/* Mobile Filter Toggle Button */}
-      <div className="md:hidden">
-        <button
-          onClick={toggleFilters}
-          className="flex items-center justify-between w-full px-4 py-2 bg-white border border-gray-300 rounded-md shadow-sm"
-        >
-          <span className="font-medium text-gray-700">Filters</span>
-          <svg 
-            className={`w-5 h-5 text-gray-500 transition-transform ${filtersExpanded ? 'transform rotate-180' : ''}`} 
-            fill="none" 
-            stroke="currentColor" 
-            viewBox="0 0 24 24" 
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-          </svg>
-        </button>
-        
-        {/* Mobile Expanded Filter Section */}
-        {filtersExpanded && (
-          <div className="mt-4 bg-white rounded-lg shadow p-4">
-            {/* Specialty Filter Section */}
-            <div className="mb-4">
-              <h3 className="text-sm font-medium text-gray-700 mb-2">Specialty</h3>
-              <div className="max-h-60 overflow-y-auto space-y-2 pr-2">
-                {specialties.map(specialty => (
-                  <div key={specialty} className="flex items-center">
-                    <input
-                      type="checkbox"
-                      id={`specialty-mobile-${specialty}`}
-                      checked={localSelectedSpecialties.includes(specialty)}
-                      onChange={() => handleSpecialtyToggle(specialty)}
-                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                    />
-                    <label
-                      htmlFor={`specialty-mobile-${specialty}`}
-                      className="ml-2 block text-sm text-gray-700"
-                    >
-                      {specialty}
-                    </label>
-                  </div>
-                ))}
-              </div>
-            </div>
-            
-            {/* Availability Filter Section */}
-            <div className="mb-4">
-              <h3 className="text-sm font-medium text-gray-700 mb-2">Availability</h3>
-              <div className="space-y-2">
-                {[
-                  { value: 'any', label: 'Any Time' },
-                  { value: 'today', label: 'Available Today' },
-                  { value: 'this-week', label: 'Available This Week' },
-                  { value: 'next-available', label: 'Next Available' }
-                ].map(option => (
-                  <div key={option.value} className="flex items-center">
-                    <input
-                      type="radio"
-                      id={`availability-mobile-${option.value}`}
-                      name="availability-mobile"
-                      checked={selectedAvailability === option.value}
-                      onChange={() => handleAvailabilityChange(option.value as AvailabilityFilter)}
-                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
-                    />
-                    <label
-                      htmlFor={`availability-mobile-${option.value}`}
-                      className="ml-2 block text-sm text-gray-700"
-                    >
-                      {option.label}
-                    </label>
-                  </div>
-                ))}
-              </div>
-            </div>
-            
-            {/* Mobile Reset Button */}
-            {(selectedSpecialties.length > 0 || selectedAvailability !== 'any') && (
-              <button
-                onClick={handleResetFilters}
-                className="w-full mt-3 py-2 px-4 bg-gray-100 hover:bg-gray-200 text-sm font-medium text-gray-700 rounded-md"
-              >
-                Clear All Filters
-              </button>
-            )}
-          </div>
-        )}
       </div>
     </div>
   );

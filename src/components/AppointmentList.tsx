@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback, useState } from 'react';
+import React, { useEffect, useCallback, useState, useMemo } from 'react';
 import { useAppointmentStore } from '../store/appointmentStore';
 import { useDoctorStore } from '../store/doctorStore';
 import { Appointment } from '../types/appointment';
@@ -81,6 +81,22 @@ const AppointmentList: React.FC = () => {
   const filteredDoctors = doctors.filter(doctor => 
     doctor.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  // Get unique doctor IDs from user's appointments
+  const doctorsWithAppointments = useMemo(() => {
+    // Extract unique doctor IDs from appointments
+    const uniqueDoctorIds = [...new Set(appointments.map(appointment => appointment.doctorId))];
+    
+    // Filter the doctors array to only include those with appointments
+    return doctors.filter(doctor => uniqueDoctorIds.includes(doctor.id));
+  }, [appointments, doctors]);
+
+  // Filter the doctors with appointments by search term
+  const filteredDoctorsWithAppointments = useMemo(() => {
+    return doctorsWithAppointments.filter(doctor => 
+      doctor.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [doctorsWithAppointments, searchTerm]);
 
   // Get the selected doctor's name for display
   const selectedDoctorName = selectedDoctor === 'all' 
@@ -187,28 +203,34 @@ const AppointmentList: React.FC = () => {
     const firstDayOfMonth = startOfMonth(currentMonth).getDay();
     
     return (
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        <div className="bg-blue-500 text-white p-4 flex justify-between items-center">
+      <div className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100">
+        <div className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white p-5 flex justify-between items-center">
           <button 
             onClick={goToPreviousMonth} 
-            className="text-white hover:bg-blue-600 p-1 rounded"
+            className="text-white hover:bg-white/10 p-2 rounded-full transition-all"
+            aria-label="Previous month"
           >
-            &lt;
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
           </button>
           <h3 className="font-bold text-xl">
             {format(currentMonth, 'MMMM yyyy')}
           </h3>
           <button 
             onClick={goToNextMonth} 
-            className="text-white hover:bg-blue-600 p-1 rounded"
+            className="text-white hover:bg-white/10 p-2 rounded-full transition-all"
+            aria-label="Next month"
           >
-            &gt;
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
           </button>
         </div>
         
-        <div className="grid grid-cols-7 bg-gray-100">
+        <div className="grid grid-cols-7 bg-gradient-to-r from-blue-50 to-indigo-50">
           {daysOfWeek.map(day => (
-            <div key={day} className="p-2 text-center font-medium text-gray-600 text-sm">
+            <div key={day} className="p-3 text-center font-medium text-gray-700 text-sm border-b border-gray-100">
               {day}
             </div>
           ))}
@@ -217,34 +239,70 @@ const AppointmentList: React.FC = () => {
         <div className="grid grid-cols-7">
           {/* Empty cells for days before the first of the month */}
           {Array.from({ length: firstDayOfMonth }).map((_, index) => (
-            <div key={`empty-${index}`} className="p-2 h-12 border-t border-l border-gray-200"></div>
+            <div key={`empty-${index}`} className="p-2 h-16 border-t border-l border-gray-100"></div>
           ))}
           
           {/* Calendar days */}
           {days.map(day => {
             const hasAppointments = dayHasAppointments(day);
             const isSelected = selectedDate && isSameDay(day, selectedDate);
+            const isToday = isSameDay(day, new Date());
             
             return (
               <div 
                 key={format(day, 'yyyy-MM-dd')}
                 onClick={() => selectDay(day)}
                 className={`
-                  p-1 h-12 border-t border-l border-gray-200 text-center relative
-                  ${hasAppointments ? 'cursor-pointer' : 'cursor-default'}
-                  ${isSelected ? 'bg-blue-100' : ''}
+                  p-2 h-16 border-t border-l border-gray-100 relative group transition-all
+                  ${hasAppointments ? 'cursor-pointer hover:bg-blue-50' : 'cursor-default'}
+                  ${isSelected ? 'bg-blue-100 hover:bg-blue-100' : ''}
+                  ${isToday ? 'bg-yellow-50' : ''}
                 `}
               >
-                <span className={`
-                  inline-flex justify-center items-center w-8 h-8 rounded-full
-                  ${hasAppointments 
-                    ? 'bg-green-500 text-white' 
-                    : 'text-gray-700'
-                  }
-                  ${isSelected ? 'ring-2 ring-blue-500' : ''}
+                <div className={`
+                  relative flex flex-col items-center 
+                  ${hasAppointments ? 'font-medium' : ''}
                 `}>
-                  {getDate(day)}
-                </span>
+                  <span className={`
+                    flex justify-center items-center w-8 h-8 rounded-full mb-1
+                    ${isToday 
+                      ? 'bg-yellow-400 text-white ring-2 ring-yellow-200' 
+                      : ''
+                    }
+                    ${isSelected && !isToday 
+                      ? 'bg-blue-500 text-white ring-2 ring-blue-200' 
+                      : ''
+                    }
+                    ${!isSelected && !isToday 
+                      ? 'text-gray-700' 
+                      : ''
+                    }
+                  `}>
+                    {getDate(day)}
+                  </span>
+                  
+                  {hasAppointments && (
+                    <div className={`
+                      w-5 h-1 rounded-full mt-0.5
+                      ${isSelected ? 'bg-blue-500' : 'bg-green-500'}
+                    `}></div>
+                  )}
+                </div>
+                
+                {/* Hover tooltip showing appointment count */}
+                {hasAppointments && (
+                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 flex items-center justify-center bg-blue-500/10 transition-opacity">
+                    <span className="bg-white text-xs font-medium py-1 px-2 rounded-full shadow-sm">
+                      {filteredAppointments.filter(appointment => {
+                        const appDate = appointment.dateTime 
+                          ? new Date(appointment.dateTime)
+                          : new Date(appointment.date || '');
+                          
+                        return isSameDay(appDate, day);
+                      }).length} appt(s)
+                    </span>
+                  </div>
+                )}
               </div>
             );
           })}
@@ -315,26 +373,38 @@ const AppointmentList: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">My Medical Appointments</h1>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+        <h1 className="text-2xl font-bold text-gray-800">My Medical Appointments</h1>
         <button 
           onClick={fetchData} 
           disabled={refreshing}
-          className={`px-4 py-2 rounded ${refreshing ? 'bg-gray-300' : 'bg-blue-500 text-white hover:bg-blue-600'}`}
+          className={`px-4 py-2 rounded-lg shadow-sm transition-all transform active:scale-95 flex items-center ${
+            refreshing 
+              ? 'bg-gray-300 cursor-not-allowed' 
+              : 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white hover:shadow'
+          }`}
         >
+          <svg className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
           {refreshing ? 'Updating...' : 'Update'}
         </button>
       </div>
       
       {error && (
-        <div className="bg-red-100 text-red-800 p-4 rounded-md">
-          <p>Error: {error}</p>
+        <div className="bg-red-50 border-l-4 border-red-500 text-red-800 p-4 rounded-md shadow-sm mb-6">
+          <div className="flex">
+            <svg className="h-5 w-5 text-red-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            <p>{error}</p>
+          </div>
         </div>
       )}
       
-      <div className="bg-white rounded-lg shadow p-4">
-        <div className="mb-4">
-          <label htmlFor="doctor-select" className="block text-sm font-medium text-gray-700 mb-1">
+      <div className="bg-white rounded-xl shadow-md p-6 border border-gray-100">
+        <div className="mb-5">
+          <label htmlFor="doctor-select" className="block text-sm font-medium text-gray-700 mb-2">
             Select Doctor
           </label>
           
@@ -348,7 +418,7 @@ const AppointmentList: React.FC = () => {
               </div>
               <input
                 type="text"
-                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm text-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg shadow-sm text-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 transition-all"
                 placeholder="Search doctor..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -361,14 +431,14 @@ const AppointmentList: React.FC = () => {
             
             {/* Selected Doctor Display */}
             <div 
-              className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 cursor-pointer bg-white"
+              className="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 cursor-pointer bg-white hover:border-blue-300 transition-all"
               onClick={(e) => {
                 e.stopPropagation();
                 setDropdownOpen(!dropdownOpen);
               }}
             >
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-700">{selectedDoctorName}</span>
+                <span className="text-sm text-gray-700 font-medium">{selectedDoctorName}</span>
                 <svg className={`w-5 h-5 text-gray-400 transition-transform ${dropdownOpen ? 'transform rotate-180' : ''}`} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
                 </svg>
@@ -377,25 +447,26 @@ const AppointmentList: React.FC = () => {
             
             {/* Doctor Dropdown */}
             {dropdownOpen && (
-              <div className="absolute z-10 mt-1 w-full bg-white shadow-lg max-h-60 rounded-md py-1 overflow-auto border border-gray-200">
+              <div className="absolute z-10 mt-1 w-full bg-white shadow-xl max-h-60 rounded-lg py-1 overflow-auto border border-gray-200 animate-fadeIn">
                 <div 
-                  className="px-3 py-2 text-sm text-gray-700 hover:bg-blue-50 cursor-pointer"
+                  className="px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 cursor-pointer transition-colors"
                   onClick={() => handleDoctorSelect('all')}
                 >
                   All doctors
                 </div>
-                {filteredDoctors.map(doctor => (
-                  <div 
-                    key={doctor.id} 
-                    className="px-3 py-2 text-sm text-gray-700 hover:bg-blue-50 cursor-pointer"
-                    onClick={() => handleDoctorSelect(doctor.id)}
-                  >
-                    {doctor.name}
-                  </div>
-                ))}
-                {filteredDoctors.length === 0 && searchTerm && (
-                  <div className="px-3 py-2 text-sm text-gray-500 italic">
-                    No doctors found
+                {filteredDoctorsWithAppointments.length > 0 ? (
+                  filteredDoctorsWithAppointments.map(doctor => (
+                    <div 
+                      key={doctor.id} 
+                      className="px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 cursor-pointer transition-colors"
+                      onClick={() => handleDoctorSelect(doctor.id)}
+                    >
+                      {doctor.name}
+                    </div>
+                  ))
+                ) : (
+                  <div className="px-4 py-2 text-sm text-gray-500 italic">
+                    {searchTerm ? 'No matching doctors found' : 'No doctors with appointments'}
                   </div>
                 )}
               </div>
@@ -408,55 +479,99 @@ const AppointmentList: React.FC = () => {
         
         {/* Appointment Details */}
         {selectedDate && (
-          <div className="mt-6">
-            <h3 className="text-lg font-semibold mb-3">
-              Appointments for {format(selectedDate, 'EEEE d MMMM, yyyy')}
-            </h3>
+          <div className="mt-8 pt-4 border-t border-gray-200">
+            <div className="flex items-center mb-4">
+              <svg className="w-5 h-5 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <h3 className="text-lg font-semibold text-gray-800">
+                Appointments for {format(selectedDate, 'EEEE, MMMM d, yyyy')}
+              </h3>
+            </div>
             
             {selectedDateAppointments.length === 0 ? (
-              <p className="text-gray-600">No appointments for this date.</p>
+              <div className="bg-gray-50 rounded-lg p-6 text-center">
+                <svg className="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <p className="text-gray-600">No appointments scheduled for this date.</p>
+              </div>
             ) : (
-              <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
+              <div className="grid gap-6 grid-cols-1 md:grid-cols-2">
                 {selectedDateAppointments.map(appointment => {
                   const doctor = findDoctor(appointment.doctorId);
                   const statusClass = getStatusBadgeClass(appointment.status);
                   const statusText = getStatusText(appointment.status);
                   
                   return (
-                    <div key={appointment.id} className="bg-white border rounded-lg shadow-sm p-4">
+                    <div key={appointment.id} className="bg-white border rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow">
                       <div className="flex justify-between items-start">
                         <div>
-                          <h4 className="font-bold">
+                          <h4 className="font-bold text-lg">
                             {appointment.patientName || 'Patient'}
                           </h4>
-                          <p className="text-sm text-gray-600">{formatAppointmentDateTime(appointment)}</p>
+                          <div className="flex items-center mt-1 text-gray-500">
+                            <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <p className="text-sm">{formatAppointmentDateTime(appointment)}</p>
+                          </div>
                         </div>
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusClass} inline-block whitespace-nowrap`}>
+                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${statusClass} inline-block whitespace-nowrap shadow-sm`}>
                           {statusText}
                         </span>
                       </div>
                       
-                      <div className="mt-3 pt-3 border-t border-gray-100">
-                        <p className="flex items-center text-sm">
-                          <span className="font-semibold mr-2">Doctor:</span> 
-                          {doctor?.name || (appointment as any).doctorName || 'Unknown'}
-                        </p>
-                        <p className="flex items-center text-sm mt-1">
-                          <span className="font-semibold mr-2">Specialty:</span> 
-                          {doctor?.specialty || 'General'}
-                        </p>
-                        <p className="flex items-center text-sm mt-1">
-                          <span className="font-semibold mr-2">Location:</span> 
-                          {doctor?.location || 'Main consultation'}
-                        </p>
+                      <div className="mt-4 pt-4 border-t border-gray-100 space-y-2">
+                        <div className="flex items-center">
+                          <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                            <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            </svg>
+                          </div>
+                          <div>
+                            <p className="text-xs text-gray-500">Doctor</p>
+                            <p className="text-sm font-medium">{doctor?.name || (appointment as any).doctorName || 'Unknown'}</p>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center">
+                          <div className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center mr-3">
+                            <svg className="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                            </svg>
+                          </div>
+                          <div>
+                            <p className="text-xs text-gray-500">Specialty</p>
+                            <p className="text-sm font-medium">{doctor?.specialty || 'General'}</p>
+                          </div>
+                        </div>
+                        
+                        {doctor?.location && (
+                          <div className="flex items-center">
+                            <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mr-3">
+                              <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                              </svg>
+                            </div>
+                            <div>
+                              <p className="text-xs text-gray-500">Location</p>
+                              <p className="text-sm font-medium">{doctor.location}</p>
+                            </div>
+                          </div>
+                        )}
                         
                         {/* Cancel Button - only show for non-cancelled appointments */}
                         {appointment.status !== 'cancelled' && (
-                          <div className="mt-3 pt-3 border-t border-gray-100">
+                          <div className="mt-6 pt-4 border-t border-gray-100">
                             <button
                               onClick={() => handleCancelAppointment(appointment.id, appointment.dateTime || `${appointment.date}T${appointment.time}`)}
-                              className="px-3 py-1 bg-red-50 text-red-600 text-xs font-medium rounded-md hover:bg-red-100 transition-colors"
+                              className="w-full px-4 py-2 bg-red-50 text-red-600 text-sm font-medium rounded-lg hover:bg-red-100 transition-colors flex items-center justify-center shadow-sm"
                             >
+                              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                              </svg>
                               Cancel Appointment
                             </button>
                           </div>
@@ -471,28 +586,59 @@ const AppointmentList: React.FC = () => {
         )}
         
         {/* Summary counts */}
-        <div className="mt-6 pt-4 border-t border-gray-200 grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
-          <div className="p-3 bg-blue-50 rounded-lg">
-            <p className="text-2xl font-bold text-blue-700">{appointments.length}</p>
-            <p className="text-sm text-blue-600">Total</p>
+        <div className="mt-8 pt-6 border-t border-gray-200 grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-5 shadow-sm border border-blue-100">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-sm font-medium text-blue-600">Total</p>
+              <div className="bg-blue-100 rounded-full p-1.5">
+                <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+              </div>
+            </div>
+            <p className="text-2xl font-bold text-gray-800">{appointments.length}</p>
           </div>
-          <div className="p-3 bg-green-50 rounded-lg">
-            <p className="text-2xl font-bold text-green-700">
+          
+          <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg p-5 shadow-sm border border-green-100">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-sm font-medium text-green-600">Confirmed</p>
+              <div className="bg-green-100 rounded-full p-1.5">
+                <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+            </div>
+            <p className="text-2xl font-bold text-gray-800">
               {appointments.filter(app => app.status === 'confirmed').length}
             </p>
-            <p className="text-sm text-green-600">Confirmed</p>
           </div>
-          <div className="p-3 bg-yellow-50 rounded-lg">
-            <p className="text-2xl font-bold text-yellow-700">
+          
+          <div className="bg-gradient-to-br from-yellow-50 to-amber-50 rounded-lg p-5 shadow-sm border border-yellow-100">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-sm font-medium text-yellow-600">Pending</p>
+              <div className="bg-yellow-100 rounded-full p-1.5">
+                <svg className="w-4 h-4 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+            </div>
+            <p className="text-2xl font-bold text-gray-800">
               {appointments.filter(app => app.status === 'pending').length}
             </p>
-            <p className="text-sm text-yellow-600">Pending</p>
           </div>
-          <div className="p-3 bg-red-50 rounded-lg">
-            <p className="text-2xl font-bold text-red-700">
+          
+          <div className="bg-gradient-to-br from-red-50 to-rose-50 rounded-lg p-5 shadow-sm border border-red-100">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-sm font-medium text-red-600">Cancelled</p>
+              <div className="bg-red-100 rounded-full p-1.5">
+                <svg className="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </div>
+            </div>
+            <p className="text-2xl font-bold text-gray-800">
               {appointments.filter(app => app.status === 'cancelled').length}
             </p>
-            <p className="text-sm text-red-600">Cancelled</p>
           </div>
         </div>
       </div>
