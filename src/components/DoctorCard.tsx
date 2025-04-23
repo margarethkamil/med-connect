@@ -349,7 +349,7 @@ const DoctorCard: React.FC<DoctorCardProps> = ({ doctor }) => {
           </div>
           
           {/* Bio - truncated */}
-          <p className="text-sm text-gray-600 line-clamp-2 mb-5">{doctor.bio}</p>
+          <p className="text-sm text-gray-600 line-clamp-2 mb-5 h-10 flex items-start">{doctor.bio || "Specialist with expertise in providing quality healthcare."}</p>
           
           {/* Action Buttons */}
           <div className="flex gap-3">
