@@ -7,6 +7,7 @@ import Appointments from './pages/appointments'
 import Login from './pages/login'
 import AdminCalendar from './pages/adminCalendar'
 import AdminDoctors from './pages/adminDoctors'
+import AdminPatients from './pages/adminPatients'
 import NotFound from './pages/NotFound'
 
 // Protected route wrapper
@@ -78,6 +79,14 @@ const routes: RouteObject[] = [
         element: (
           <AdminRoute>
             <AdminDoctors />
+          </AdminRoute>
+        )
+      },
+      {
+        path: 'admin/patients',
+        element: (
+          <AdminRoute>
+            <AdminPatients />
           </AdminRoute>
         )
       },

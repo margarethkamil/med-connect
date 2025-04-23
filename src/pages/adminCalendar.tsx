@@ -7,6 +7,7 @@ import { useDoctorStore } from '../store/doctorStore';
 import { Appointment } from '../types/appointment';
 import { getAllAppointments } from '../api/client';
 import { trackCrudEvents } from '../services/analytics';
+import AdminNavbar from '../components/AdminNavbar';
 
 // Panama time zone
 const TIME_ZONE = 'America/Panama';
@@ -346,18 +347,22 @@ const AdminCalendar: React.FC = () => {
           </button>
         </div>
         
+        {/* Day names row */}
         <div className="grid grid-cols-7 bg-indigo-50">
           {daysOfWeek.map(day => (
             <div key={day} className="p-2 text-center font-medium text-indigo-800 text-sm">
-              {day}
+              {/* Show first letter on mobile, full name on larger screens */}
+              <span className="hidden sm:inline">{day}</span>
+              <span className="sm:hidden">{day.charAt(0)}</span>
             </div>
           ))}
         </div>
         
+        {/* Calendar grid */}
         <div className="grid grid-cols-7">
           {/* Empty cells for days before the first of the month */}
           {Array.from({ length: firstDayOfMonth }).map((_, index) => (
-            <div key={`empty-${index}`} className="p-2 h-16 border-t border-l border-gray-200"></div>
+            <div key={`empty-${index}`} className="p-1 sm:p-2 h-12 sm:h-16 border-t border-l border-gray-200"></div>
           ))}
           
           {/* Calendar days */}
@@ -372,14 +377,14 @@ const AdminCalendar: React.FC = () => {
                 key={format(day, 'yyyy-MM-dd')}
                 onClick={() => selectDay(day)}
                 className={`
-                  p-1 h-16 border-t border-l border-gray-200 text-center relative cursor-pointer hover:bg-indigo-50
+                  p-1 h-12 sm:h-16 border-t border-l border-gray-200 text-center relative cursor-pointer hover:bg-indigo-50
                   ${isSelected ? 'bg-indigo-100 font-bold' : ''}
                   ${isToday ? 'bg-yellow-50' : ''}
                 `}
               >
                 <div className="flex flex-col h-full">
                   <span className={`
-                    self-center w-8 h-8 flex items-center justify-center rounded-full
+                    self-center w-6 h-6 sm:w-8 sm:h-8 flex items-center justify-center rounded-full
                     ${isToday ? 'bg-yellow-400 text-white' : 'text-gray-700'}
                     ${isSelected ? 'ring-2 ring-indigo-500' : ''}
                   `}>
@@ -389,10 +394,14 @@ const AdminCalendar: React.FC = () => {
                   {hasAppointments && (
                     <div className="mt-1">
                       <span className={`
-                        text-xs font-medium px-2 py-1 rounded-full
+                        text-xs font-medium px-1 sm:px-2 py-0.5 sm:py-1 rounded-full
                         ${appointmentsCount > 0 ? 'bg-indigo-100 text-indigo-800' : 'hidden'}
                       `}>
-                        {appointmentsCount} appt{appointmentsCount !== 1 ? 's' : ''}
+                        {appointmentsCount} {appointmentsCount === 1 ? (
+                          <span className="hidden sm:inline">appt</span>
+                        ) : (
+                          <span className="hidden sm:inline">appts</span>
+                        )}
                       </span>
                     </div>
                   )}
@@ -421,16 +430,18 @@ const AdminCalendar: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-      <div className="flex justify-between items-center flex-wrap gap-4">
-        <div>
+    <div className="container mx-auto px-4 py-6 max-w-6xl">
+      <AdminNavbar />
+      
+      <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-2">
+        <div className="text-center sm:text-left">
           <h1 className="text-2xl font-bold text-gray-900">Admin Calendar</h1>
           <p className="text-gray-600">View and manage all appointments</p>
         </div>
         
-        <div className="flex items-center space-x-4">
+        <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-4 mt-2 sm:mt-0">
           {/* Status filter */}
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center gap-1 sm:gap-2">
             <label htmlFor="status-filter" className="text-sm font-medium text-gray-700">
               Status:
             </label>
@@ -447,7 +458,7 @@ const AdminCalendar: React.FC = () => {
             </select>
           </div>
           
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center gap-1 sm:gap-2">
             <span className={`inline-block w-3 h-3 rounded-full bg-yellow-400`}></span>
             <span className="text-sm text-gray-600">Today</span>
           </div>
@@ -456,7 +467,7 @@ const AdminCalendar: React.FC = () => {
             onClick={fetchData} 
             disabled={refreshing}
             className={`
-              px-4 py-2 rounded-md flex items-center space-x-2
+              px-4 py-2 rounded-md flex items-center gap-1 sm:gap-2
               ${refreshing ? 'bg-gray-300' : 'bg-indigo-600 text-white hover:bg-indigo-700'}
             `}
           >
@@ -501,55 +512,55 @@ const AdminCalendar: React.FC = () => {
       )}
       
       {error && (
-        <div className="bg-red-100 text-red-800 p-4 rounded-md">
+        <div className="bg-red-100 text-red-800 p-4 rounded-md mb-4">
           <p>Error: {error}</p>
         </div>
       )}
       
-      <div className="grid grid-cols-1 lg:grid-cols-7 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-7 gap-4 sm:gap-6">
         <div className="lg:col-span-4">
           {renderCalendar()}
           
           {/* Summary statistics */}
-          <div className="mt-6 grid grid-cols-1 sm:grid-cols-4 gap-4">
-            <div className="bg-white p-4 rounded-lg shadow">
-              <p className="text-2xl font-bold text-indigo-600">{appointments.length}</p>
-              <p className="text-sm text-gray-500">Total appointments</p>
+          <div className="mt-4 sm:mt-6 grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4">
+            <div className="bg-indigo-100 p-3 sm:p-4 rounded-lg shadow">
+              <p className="text-xl sm:text-2xl font-bold text-indigo-700">{appointments.length}</p>
+              <p className="text-xs sm:text-sm text-indigo-600">Total appointments</p>
             </div>
-            <div className="bg-white p-4 rounded-lg shadow">
-              <p className="text-2xl font-bold text-green-600">
+            <div className="bg-green-100 p-3 sm:p-4 rounded-lg shadow">
+              <p className="text-xl sm:text-2xl font-bold text-green-700">
                 {appointments.filter(app => app.status === 'confirmed').length}
               </p>
-              <p className="text-sm text-gray-500">Confirmed</p>
+              <p className="text-xs sm:text-sm text-green-600">Confirmed</p>
             </div>
-            <div className="bg-white p-4 rounded-lg shadow">
-              <p className="text-2xl font-bold text-yellow-600">
+            <div className="bg-yellow-100 p-3 sm:p-4 rounded-lg shadow">
+              <p className="text-xl sm:text-2xl font-bold text-yellow-700">
                 {appointments.filter(app => app.status === 'pending').length}
               </p>
-              <p className="text-sm text-gray-500">Pending</p>
+              <p className="text-xs sm:text-sm text-yellow-600">Pending</p>
             </div>
-            <div className="bg-white p-4 rounded-lg shadow">
-              <p className="text-2xl font-bold text-red-600">
+            <div className="bg-red-100 p-3 sm:p-4 rounded-lg shadow">
+              <p className="text-xl sm:text-2xl font-bold text-red-700">
                 {appointments.filter(app => app.status === 'cancelled').length}
               </p>
-              <p className="text-sm text-gray-500">Cancelled</p>
+              <p className="text-xs sm:text-sm text-red-600">Cancelled</p>
             </div>
           </div>
         </div>
         
-        <div className="lg:col-span-3 bg-white rounded-lg shadow p-4">
+        <div className="lg:col-span-3 bg-white rounded-lg shadow p-3 sm:p-4 mt-4 lg:mt-0">
           {selectedDate ? (
             <>
-              <h3 className="text-lg font-semibold pb-3 border-b border-gray-200">
-                Appointments for {format(selectedDate, 'EEEE, MMMM d, yyyy')}
+              <h3 className="text-base sm:text-lg font-semibold pb-2 sm:pb-3 border-b border-gray-200">
+                Appointments for {format(selectedDate, 'EEE, MMM d, yyyy')}
               </h3>
               
               {sortedAppointments.length === 0 ? (
-                <div className="py-8 text-center">
+                <div className="py-6 sm:py-8 text-center">
                   <p className="text-gray-500">No appointments for this date</p>
                 </div>
               ) : (
-                <div className="mt-4 space-y-4 max-h-[600px] overflow-y-auto">
+                <div className="mt-3 sm:mt-4 space-y-3 sm:space-y-4 max-h-[400px] sm:max-h-[600px] overflow-y-auto">
                   {sortedAppointments.map(appointment => {
                     const doctorName = findDoctorName(appointment.doctorId);
                     const statusClass = getStatusBadgeClass(appointment.status);
@@ -558,26 +569,26 @@ const AdminCalendar: React.FC = () => {
                     return (
                       <div 
                         key={appointment.id} 
-                        className="border-l-4 border-indigo-500 pl-4 py-3 hover:bg-gray-50 rounded-r"
+                        className="border-l-4 border-indigo-500 pl-3 sm:pl-4 py-2 sm:py-3 hover:bg-gray-50 rounded-r"
                       >
                         <div className="flex justify-between items-start">
                           <div>
                             <span className="font-semibold text-gray-900">{formatAppointmentTime(appointment)}</span>
                             <h4 className="font-medium text-gray-800">{appointment.patientName || 'Unknown Patient'}</h4>
-                            <p className="text-sm text-gray-600 mt-1">
-                              <span className="inline-block w-4 h-4 bg-indigo-100 rounded-full mr-1"></span>
+                            <p className="text-xs sm:text-sm text-gray-600 mt-1">
+                              <span className="inline-block w-3 h-3 sm:w-4 sm:h-4 bg-indigo-100 rounded-full mr-1"></span>
                               {doctorName}
                             </p>
-                            <p className="text-sm text-gray-500 mt-1">
+                            <p className="text-xs sm:text-sm text-gray-500 mt-1">
                               <span className="font-medium">User:</span> {appointment.patientEmail || 'Unknown'}
                             </p>
                             
                             {/* Edit button */}
                             <button
                               onClick={() => handleEditAppointment(appointment)}
-                              className="mt-2 inline-flex items-center px-2.5 py-1.5 border border-indigo-300 text-xs font-medium rounded text-indigo-700 bg-indigo-50 hover:bg-indigo-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                              className="mt-2 inline-flex items-center px-2 py-1 sm:px-2.5 sm:py-1.5 border border-indigo-300 text-xs font-medium rounded text-indigo-700 bg-indigo-50 hover:bg-indigo-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                             >
-                              <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 sm:h-3.5 sm:w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                               </svg>
                               Edit
@@ -592,16 +603,16 @@ const AdminCalendar: React.FC = () => {
                   })}
                   
                   {hasMoreAppointments && (
-                    <div className="flex justify-center py-3">
+                    <div className="flex justify-center py-2 sm:py-3">
                       <button
                         onClick={loadMoreAppointments}
                         disabled={isLoadingMore}
-                        className={`px-4 py-2 text-sm font-medium rounded-md 
+                        className={`px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium rounded-md 
                           ${isLoadingMore ? 'bg-gray-300' : 'bg-indigo-50 text-indigo-600 hover:bg-indigo-100'}`}
                       >
                         {isLoadingMore ? (
                           <span className="flex items-center">
-                            <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-indigo-600" fill="none" viewBox="0 0 24 24">
+                            <svg className="animate-spin -ml-1 mr-2 h-3 w-3 sm:h-4 sm:w-4 text-indigo-600" fill="none" viewBox="0 0 24 24">
                               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                             </svg>
@@ -617,12 +628,12 @@ const AdminCalendar: React.FC = () => {
               )}
             </>
           ) : (
-            <div className="py-16 text-center">
-              <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+            <div className="py-12 sm:py-16 text-center">
+              <svg className="mx-auto h-10 w-10 sm:h-12 sm:w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
               <h3 className="mt-2 text-sm font-medium text-gray-900">No date selected</h3>
-              <p className="mt-1 text-sm text-gray-500">Select a date from the calendar to view appointments.</p>
+              <p className="mt-1 text-xs sm:text-sm text-gray-500">Select a date from the calendar to view appointments.</p>
             </div>
           )}
         </div>
@@ -630,108 +641,109 @@ const AdminCalendar: React.FC = () => {
 
       {/* Edit Appointment Modal */}
       {isEditModalOpen && (
-        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl p-6 max-w-md w-full mx-4">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-medium text-gray-900">Edit Appointment</h3>
-              <button
-                onClick={() => setIsEditModalOpen(false)}
-                className="text-gray-400 hover:text-gray-500"
-              >
-                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
+        <div className="fixed inset-0 overflow-y-auto z-50">
+          <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center">
+            {/* Background overlay with blur */}
+            <div className="fixed inset-0 backdrop-blur-md bg-black/30 transition-opacity" aria-hidden="true"></div>
             
-            {updateError && (
-              <div className="mb-4 bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-md">
-                <p className="text-sm">{updateError}</p>
-              </div>
-            )}
-            
-            <div className="space-y-4">
-              <div>
-                <label htmlFor="patientName" className="block text-sm font-medium text-gray-700">Patient Name</label>
-                <input
-                  type="text"
-                  id="patientName"
-                  name="patientName"
-                  value={editFormData.patientName}
-                  onChange={handleEditFormChange}
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                />
-              </div>
-              
-              <div>
-                <label htmlFor="patientEmail" className="block text-sm font-medium text-gray-700">Email</label>
-                <input
-                  type="email"
-                  id="patientEmail"
-                  name="patientEmail"
-                  value={editFormData.patientEmail}
-                  onChange={handleEditFormChange}
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                />
-              </div>
-              
-              <div>
-                <label htmlFor="status" className="block text-sm font-medium text-gray-700">Status</label>
-                <select
-                  id="status"
-                  name="status"
-                  value={editFormData.status}
-                  onChange={handleEditFormChange}
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            {/* Modal content */}
+            <div 
+              className="inline-block align-bottom bg-white rounded-lg shadow-xl p-4 sm:p-6 max-w-md w-full relative z-50"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-medium text-gray-900">Edit Appointment</h3>
+                <button
+                  onClick={() => setIsEditModalOpen(false)}
+                  className="text-gray-400 hover:text-gray-500"
                 >
-                  <option value="pending">Pending</option>
-                  <option value="confirmed">Confirmed</option>
-                  <option value="cancelled">Cancelled</option>
-                </select>
+                  <span className="sr-only">Close</span>
+                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
               </div>
               
-              <div>
-                <label htmlFor="doctorId" className="block text-sm font-medium text-gray-700">Doctor</label>
-                <select
-                  id="doctorId"
-                  name="doctorId"
-                  value={editFormData.doctorId}
-                  onChange={handleEditFormChange}
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                >
-                  {doctors.map(doctor => (
-                    <option key={doctor.id} value={doctor.id}>{doctor.name}</option>
-                  ))}
-                </select>
-              </div>
-              
-              {editingAppointment && (
-                <div className="bg-gray-50 p-3 rounded-md">
-                  <p className="text-sm text-gray-500">
-                    <span className="font-medium">Appointment ID:</span> {editingAppointment.id}
-                  </p>
-                  <p className="text-sm text-gray-500">
-                    <span className="font-medium">Date/Time:</span> {editingAppointment.dateTime ? format(new Date(editingAppointment.dateTime), 'PPpp') : `${editingAppointment.date} at ${editingAppointment.time}`}
-                  </p>
+              {updateError && (
+                <div className="mb-4 bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-md">
+                  <p className="text-sm">{updateError}</p>
                 </div>
               )}
-            </div>
-            
-            <div className="mt-5 flex justify-end space-x-3">
-              <button
-                type="button"
-                onClick={() => setIsEditModalOpen(false)}
-                className="py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={handleSaveAppointment}
-                className="py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-              >
-                Save Changes
-              </button>
+              
+              <div className="space-y-4">
+                <div>
+                  <label htmlFor="patientName" className="block text-sm font-medium text-gray-700">Patient Name</label>
+                  <input
+                    type="text"
+                    id="patientName"
+                    name="patientName"
+                    value={editFormData.patientName}
+                    onChange={handleEditFormChange}
+                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                  />
+                </div>
+                
+                <div>
+                  <label htmlFor="patientEmail" className="block text-sm font-medium text-gray-700">Email</label>
+                  <input
+                    type="email"
+                    id="patientEmail"
+                    name="patientEmail"
+                    value={editFormData.patientEmail}
+                    onChange={handleEditFormChange}
+                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                  />
+                </div>
+                
+                <div>
+                  <label htmlFor="status" className="block text-sm font-medium text-gray-700">Status</label>
+                  <select
+                    id="status"
+                    name="status"
+                    value={editFormData.status}
+                    onChange={handleEditFormChange}
+                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                  >
+                    <option value="pending">Pending</option>
+                    <option value="confirmed">Confirmed</option>
+                    <option value="cancelled">Cancelled</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label htmlFor="doctorId" className="block text-sm font-medium text-gray-700">Doctor</label>
+                  <select
+                    id="doctorId"
+                    name="doctorId"
+                    value={editFormData.doctorId}
+                    onChange={handleEditFormChange}
+                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                  >
+                    {doctors.map(doctor => (
+                      <option key={doctor.id} value={doctor.id}>
+                        {doctor.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              
+              <div className="mt-5 flex flex-col sm:flex-row sm:justify-end space-y-2 sm:space-y-0 sm:space-x-3">
+                <button
+                  type="button"
+                  className="w-full sm:w-auto py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                  onClick={() => setIsEditModalOpen(false)}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  className="w-full sm:w-auto py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                  onClick={handleSaveAppointment}
+                >
+                  Save Changes
+                </button>
+              </div>
             </div>
           </div>
         </div>

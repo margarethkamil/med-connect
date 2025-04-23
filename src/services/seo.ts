@@ -196,6 +196,12 @@ export const seoConfigs = {
       title: 'Manage Doctors',
       description: 'Administrative interface for managing doctor profiles, availability, and information.',
       ogType: 'website'
+    }),
+    
+    patients: (): SeoProps => ({
+      title: 'Manage Patients',
+      description: 'Administrative interface for managing patient information and appointment history.',
+      ogType: 'website'
     })
   }
 };

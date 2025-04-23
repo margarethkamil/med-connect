@@ -1,10 +1,12 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDoctorStore } from '../store/doctorStore';
+import { useAppointmentStore } from '../store/appointmentStore';
 import { Doctor } from '../types/doctor';
 import { trackCrudEvents } from '../services/analytics';
 import { useSeo } from '../services/useSeo';
 import { seoConfigs } from '../services/seo';
+import AdminNavbar from '../components/AdminNavbar';
 
 const AdminDoctors: React.FC = () => {
   // Apply SEO metadata for the admin doctors page
@@ -195,151 +197,151 @@ const AdminDoctors: React.FC = () => {
   // If the page is initially loading
   if (loading && !refreshing && doctors.length === 0) {
     return (
-      <div className="py-10 text-center">
-        <div className="flex flex-col items-center justify-center">
-          <svg className="animate-spin h-10 w-10 text-indigo-600 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+      <div className="container mx-auto px-4 py-6 max-w-6xl">
+        <AdminNavbar />
+        <div className="py-8 text-center">
+          <svg className="mx-auto animate-spin h-10 w-10 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
           </svg>
-          <p className="text-gray-600">Loading doctors...</p>
+          <p className="mt-4 text-lg text-gray-600">Loading doctors...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-      <div className="flex justify-between items-center flex-wrap gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Manage Doctors</h1>
-          <p className="text-gray-600">View and manage all doctors in the system</p>
-        </div>
-        
-        <div className="flex items-center space-x-4">
-          {/* Search */}
-          <div className="relative max-w-xs">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <svg className="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
-              </svg>
-            </div>
-            <input
-              type="text"
-              className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-              placeholder="Search doctors..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-          
-          <button 
-            onClick={handleAddDoctor} 
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="-ml-1 mr-2 h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
-            </svg>
-            Add Doctor
-          </button>
-          
-          <button 
-            onClick={fetchData} 
-            disabled={refreshing}
-            className={`
-              px-4 py-2 rounded-md flex items-center space-x-2
-              ${refreshing ? 'bg-gray-300' : 'bg-indigo-600 text-white hover:bg-indigo-700'}
-            `}
-          >
-            {refreshing ? (
-              <>
-                <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                <span>Refreshing...</span>
-              </>
-            ) : (
-              <>
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
-                <span>Refresh</span>
-              </>
-            )}
-          </button>
-        </div>
+    <div className="container mx-auto px-4 py-6 max-w-6xl">
+      <AdminNavbar />
+      
+      <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-2">
+        <h1 className="text-2xl font-bold text-gray-900 text-center sm:text-left">Doctor Management</h1>
       </div>
       
-      {error && (
-        <div className="bg-red-100 text-red-800 p-4 rounded-md">
-          <p>Error: {error}</p>
+      <div className="bg-white shadow rounded-lg p-4 sm:p-6">
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
+          <p className="text-gray-600 text-center sm:text-left">View and manage all doctors in the system</p>
+          
+          <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
+            {/* Search */}
+            <div className="relative w-full sm:w-auto">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg className="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <input
+                type="text"
+                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Search doctors..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+            
+            <div className="flex gap-2 mt-2 sm:mt-0">
+              <button 
+                onClick={handleAddDoctor} 
+                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="-ml-1 mr-2 h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
+                </svg>
+                Add Doctor
+              </button>
+              
+              <button 
+                onClick={fetchData} 
+                disabled={refreshing}
+                className={`px-4 py-2 rounded-md flex items-center space-x-2 ${refreshing ? 'bg-gray-300' : 'bg-blue-600 text-white hover:bg-blue-700'}`}
+              >
+                {refreshing ? (
+                  <>
+                    <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span>Refreshing...</span>
+                  </>
+                ) : (
+                  <>
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    <span>Refresh</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
         </div>
-      )}
+        
+        {error && (
+          <div className="bg-red-100 text-red-800 p-4 rounded-md mb-6">
+            <p>Error: {error}</p>
+          </div>
+        )}
 
-      {/* Doctors List */}
-      <div className="bg-white shadow overflow-hidden sm:rounded-md">
-        <ul className="divide-y divide-gray-200">
-          {filteredDoctors.length === 0 ? (
-            <li className="px-6 py-4 text-center text-gray-500">
-              {searchTerm ? 'No doctors matching your search' : 'No doctors found in the system'}
-            </li>
-          ) : (
-            filteredDoctors.map(doctor => (
-              <li key={doctor.id}>
-                <div className="px-4 py-4 sm:px-6 flex items-center justify-between">
-                  <div className="flex items-center">
-                    <div className="flex-shrink-0 h-16 w-16">
-                      <img 
-                        className="h-16 w-16 rounded-full object-cover" 
-                        src={doctor.photo || 'https://via.placeholder.com/150?text=Doctor'} 
-                        alt={doctor.name} 
-                      />
-                    </div>
-                    <div className="ml-4">
-                      <div className="text-sm font-medium text-indigo-600">{doctor.name}</div>
-                      <div className="text-sm text-gray-500">{doctor.specialty}</div>
-                      {doctor.location !== undefined && (
-                        <div className="text-sm text-gray-500">{doctor.location}</div>
-                      )}
-                      {doctor.location === undefined && (
-                        <div className="text-sm text-gray-500">No location specified</div>
-                      )}
-                      <div className="text-sm text-gray-500">
-                        <span className="font-medium">Fee:</span> {doctor.fee ? `$${doctor.fee}` : 'N/A'}
+        {/* Doctors List */}
+        <div className="bg-white shadow overflow-hidden sm:rounded-md">
+          <ul className="divide-y divide-gray-200">
+            {filteredDoctors.length === 0 ? (
+              <li className="px-6 py-4 text-center text-gray-500">
+                {searchTerm ? 'No doctors matching your search' : 'No doctors found in the system'}
+              </li>
+            ) : (
+              filteredDoctors.map(doctor => (
+                <li key={doctor.id}>
+                  <div className="px-4 py-4 sm:px-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                      <div className="flex-shrink-0 h-16 w-16 mx-auto sm:mx-0">
+                        <img 
+                          className="h-16 w-16 rounded-full object-cover" 
+                          src={doctor.photo || 'https://via.placeholder.com/150?text=Doctor'} 
+                          alt={doctor.name} 
+                        />
+                      </div>
+                      <div className="text-center sm:text-left">
+                        <div className="text-sm font-medium text-blue-600">{doctor.name}</div>
+                        <div className="text-sm text-gray-500">{doctor.specialty}</div>
+                        <div className="text-sm text-gray-500">{doctor.location || 'No location specified'}</div>
+                        <div className="text-sm text-gray-500">
+                          <span className="font-medium">Fee:</span> {doctor.fee ? `$${doctor.fee}` : 'N/A'}
+                        </div>
                       </div>
                     </div>
+                    <div className="flex items-center justify-center sm:justify-end space-x-2">
+                      <button
+                        onClick={() => handleEditDoctor(doctor)}
+                        className="inline-flex items-center px-3 py-1.5 border border-blue-300 text-xs font-medium rounded text-blue-700 bg-blue-50 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDeleteDoctor(doctor.id)}
+                        className="inline-flex items-center px-3 py-1.5 border border-red-300 text-xs font-medium rounded text-red-700 bg-red-50 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                        Delete
+                      </button>
+                    </div>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <button
-                      onClick={() => handleEditDoctor(doctor)}
-                      className="inline-flex items-center px-3 py-1.5 border border-indigo-300 text-xs font-medium rounded text-indigo-700 bg-indigo-50 hover:bg-indigo-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                      </svg>
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleDeleteDoctor(doctor.id)}
-                      className="inline-flex items-center px-3 py-1.5 border border-red-300 text-xs font-medium rounded text-red-700 bg-red-50 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                      </svg>
-                      Delete
-                    </button>
-                  </div>
-                </div>
-              </li>
-            ))
-          )}
-        </ul>
+                </li>
+              ))
+            )}
+          </ul>
+        </div>
       </div>
 
       {/* Doctor Edit Modal */}
       {isEditModalOpen && (
-        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 backdrop-blur-md bg-black/30 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl p-4 sm:p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-medium text-gray-900">
                 {editingDoctor ? 'Edit Doctor' : 'Add New Doctor'}
@@ -370,6 +372,7 @@ const AdminDoctors: React.FC = () => {
                   value={editFormData.name}
                   onChange={handleEditFormChange}
                   className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                  required
                 />
               </div>
               
@@ -382,6 +385,7 @@ const AdminDoctors: React.FC = () => {
                   value={editFormData.specialty}
                   onChange={handleEditFormChange}
                   className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                  required
                 />
               </div>
               
@@ -442,6 +446,7 @@ const AdminDoctors: React.FC = () => {
                   value={editFormData.photo}
                   onChange={handleEditFormChange}
                   className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                  placeholder="https://example.com/doctor-photo.jpg"
                 />
               </div>
               
@@ -458,18 +463,18 @@ const AdminDoctors: React.FC = () => {
               </div>
             </div>
             
-            <div className="mt-5 flex justify-end space-x-3">
+            <div className="mt-5 flex flex-col sm:flex-row sm:justify-end space-y-2 sm:space-y-0 sm:space-x-3">
               <button
                 type="button"
                 onClick={() => setIsEditModalOpen(false)}
-                className="py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                className="w-full sm:w-auto py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
               >
                 Cancel
               </button>
               <button
                 type="button"
                 onClick={handleSaveDoctor}
-                className="py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                className="w-full sm:w-auto py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
               >
                 {editingDoctor ? 'Save Changes' : 'Add Doctor'}
               </button>
