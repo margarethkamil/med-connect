@@ -130,15 +130,15 @@ const DoctorCard: React.FC<DoctorCardProps> = ({ doctor }) => {
       <div className="bg-white rounded-xl shadow-md overflow-hidden transition-all duration-300 hover:shadow-xl transform hover:-translate-y-1 border border-gray-100">
         <div className="relative">
           {/* Doctor Image */}
-          <div className="h-56 bg-gradient-to-r from-blue-50 to-indigo-50 flex items-center justify-center overflow-hidden">
+          <div className="h-44 bg-gradient-to-r from-blue-50 to-indigo-50 flex items-center justify-center overflow-hidden">
             {doctor.photo ? (
               <img 
                 src={doctor.photo} 
                 alt={doctor.name} 
-                className="h-full w-full object-cover"
+                className="h-full w-full object-contain"
               />
             ) : (
-              <div className="w-24 h-24 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white text-4xl font-medium">
+              <div className="w-20 h-20 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white text-3xl font-medium">
                 {doctor.name.charAt(0)}
               </div>
             )}
