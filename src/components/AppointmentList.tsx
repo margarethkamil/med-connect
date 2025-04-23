@@ -3,7 +3,7 @@ import { useAppointmentStore } from '../store/appointmentStore';
 import { useDoctorStore } from '../store/doctorStore';
 import { Appointment } from '../types/appointment';
 import { Doctor } from '../types/doctor';
-import { format, getMonth, getYear, getDate, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay } from 'date-fns';
+import { format, getDate, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay } from 'date-fns';
 import { toZonedTime } from 'date-fns-tz';
 import { useNavigate } from 'react-router-dom';
 import { trackCrudEvents } from '../services/analytics';

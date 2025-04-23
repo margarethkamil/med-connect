@@ -1,8 +1,8 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Doctor } from '../types/doctor';
 import BookingModal from './BookingModal';
 import { useDoctorStore } from '../store/doctorStore';
-import { format, differenceInDays } from 'date-fns';
+import { differenceInDays } from 'date-fns';
 import ReactDOM from 'react-dom';
 import { toZonedTime, format as formatTz } from 'date-fns-tz';
 

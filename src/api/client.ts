@@ -1,4 +1,4 @@
-import { Doctor, Availability } from '../types/doctor';
+import { Doctor } from '../types/doctor';
 import { Appointment, BookingRequest } from '../types/appointment';
 
 const API_BASE_URL = 'https://us-central1-doctor-booking-backend-5c6aa.cloudfunctions.net/api';
@@ -10,7 +10,6 @@ const DOCTOR_AVAILABILITY_URL = (id: string) => `${API_BASE_URL}/doctors/${id}/a
 
 // Appointment endpoints
 const APPOINTMENTS_URL = `${API_BASE_URL}/appointments`;
-const APPOINTMENT_DETAILS_URL = (id: string) => `${API_BASE_URL}/appointments/${id}`;
 const USER_APPOINTMENTS_URL = (userId: string) => `${API_BASE_URL}/appointments/user/${userId}`;
 const CHECK_SLOT_AVAILABLE_URL = (doctorId: string, dateTime: string) => 
   `${API_BASE_URL}/appointments/available/${doctorId}/${dateTime}`;

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import FilterComponent from './FilterComponent';
 import DoctorCard from './DoctorCard';
 import { useDoctorStore } from '../store/doctorStore';

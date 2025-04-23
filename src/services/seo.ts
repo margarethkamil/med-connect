@@ -17,8 +17,7 @@ export interface SeoProps {
 
 // Base site information
 const siteName = 'MedConnect - Doctor Booking';
-const siteDescription = 'Find and book appointments with qualified doctors in your area';
-const siteUrl = 'https://medconnect.example.com';
+const siteUrl = 'https://doctor-booking-c4af2.web.app';
 
 /**
  * Apply SEO metadata to the document

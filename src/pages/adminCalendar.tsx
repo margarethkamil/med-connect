@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAppointmentStore } from '../store/appointmentStore';
 import { useDoctorStore } from '../store/doctorStore';
 import { Appointment } from '../types/appointment';
-import { getAllAppointments, updateAppointmentStatus } from '../api/client';
+import { getAllAppointments } from '../api/client';
 import { trackCrudEvents } from '../services/analytics';
 
 // Panama time zone
@@ -35,7 +35,6 @@ const AdminCalendar: React.FC = () => {
   const loading = useAppointmentStore(state => state?.loading || false);
   const error = useAppointmentStore(state => state?.error || null);
   const fetchAllAppointments = useAppointmentStore(state => state?.fetchAllAppointments);
-  const updateAppointment = useAppointmentStore(state => state?.updateAppointmentStatus);
   const updateAppointmentDetails = useAppointmentStore(state => state?.updateAppointmentDetails);
 
   // Doctor store

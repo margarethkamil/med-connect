@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Doctor } from '../types/doctor';
 import { useDoctorStore } from '../store/doctorStore';
-import { useAppointmentStore, DEMO_USER_ID } from '../store/appointmentStore';
+import { useAppointmentStore } from '../store/appointmentStore';
 import { format, parseISO, addDays, isBefore, isSameDay, startOfDay } from 'date-fns';
 import { toZonedTime } from 'date-fns-tz';
 import { useNavigate } from 'react-router-dom';
