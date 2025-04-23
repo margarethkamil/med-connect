@@ -23,7 +23,7 @@ const formatDate = (dateString: string): string => {
     return format(date, 'EEEE, MMMM d, yyyy');
   } catch (error) {
     // If there's an error, return the original string
-    console.error('Error formatting date:', error);
+    //console.error('Error formatting date:', error);
     return dateString;
   }
 };
@@ -56,7 +56,7 @@ const getFormattedDateTime = (appointment: Appointment) => {
     // Fallback
     return { formattedDate: 'No date', formattedTime: 'No time' };
   } catch (error) {
-    console.error('Error formatting date/time:', error);
+    //console.error('Error formatting date/time:', error);
     return { formattedDate: 'Error', formattedTime: 'Error' };
   }
 };
