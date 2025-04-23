@@ -975,7 +975,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ doctor, isOpen, onClose }) 
     <>
       {/* Backdrop - positioned below the modal content */}
       <div 
-        className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity z-40" 
+        className="fixed inset-0 backdrop-blur-sm bg-black/30 transition-opacity z-40" 
         onClick={handleClose}
         aria-hidden="true"
       />

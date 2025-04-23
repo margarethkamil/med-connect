@@ -431,7 +431,7 @@ const AppointmentList: React.FC = () => {
                           </h4>
                           <p className="text-sm text-gray-600">{formatAppointmentDateTime(appointment)}</p>
                         </div>
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusClass}`}>
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusClass} inline-block whitespace-nowrap`}>
                           {statusText}
                         </span>
                       </div>
@@ -471,10 +471,10 @@ const AppointmentList: React.FC = () => {
         )}
         
         {/* Summary counts */}
-        <div className="mt-6 pt-4 border-t border-gray-200 grid grid-cols-4 gap-4 text-center">
+        <div className="mt-6 pt-4 border-t border-gray-200 grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
           <div className="p-3 bg-blue-50 rounded-lg">
             <p className="text-2xl font-bold text-blue-700">{appointments.length}</p>
-            <p className="text-sm text-blue-600">Total appointments</p>
+            <p className="text-sm text-blue-600">Total</p>
           </div>
           <div className="p-3 bg-green-50 rounded-lg">
             <p className="text-2xl font-bold text-green-700">
