@@ -390,7 +390,8 @@ const BookingModal: React.FC<BookingModalProps> = ({ doctor, isOpen, onClose }) 
         patientPhone: formData.phone,
         date: format(selectedDate, 'yyyy-MM-dd'),
         time: selectedTime,
-        reason: formData.reason
+        reason: formData.reason,
+        status: 'pending' as const
       };
       
       //console.log('Booking appointment with data:', appointmentData);
@@ -890,9 +891,6 @@ const BookingModal: React.FC<BookingModalProps> = ({ doctor, isOpen, onClose }) 
         <h3 className="mt-4 text-lg font-medium text-gray-900">Appointment Confirmed!</h3>
         <p className="mt-2 text-sm text-gray-500">
           Your appointment with Dr. {doctor.name} on {format(dateTime, 'MMMM d')} at {format(dateTime, 'h:mm a')} has been booked.
-        </p>
-        <p className="mt-1 text-sm text-gray-500">
-          A confirmation email has been sent to {formData.email}.
         </p>
         <div className="mt-6 space-x-3">
           <button
