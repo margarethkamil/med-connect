@@ -33,6 +33,7 @@ interface Patient {
   hasPending: boolean;    // Has at least one pending appointment
   hasCancelled: boolean;  // Has at least one cancelled appointment
   patientData?: PatientData; // Full patient data from API
+  appointments: Appointment[]; // Store the actual appointments for this patient
 }
 
 const API_BASE_URL = 'https://us-central1-doctor-booking-backend-5c6aa.cloudfunctions.net/api';
@@ -65,23 +66,21 @@ const AdminPatients: React.FC = () => {
   const doctors = useDoctorStore(state => state.doctors);
   const fetchDoctors = useDoctorStore(state => state.fetchDoctors);
 
-  // Fetch patient data from API
-  const fetchPatientById = async (patientId: string): Promise<PatientData | null> => {
+  // Fetch all patients from API
+  const fetchAllPatients = async (): Promise<PatientData[]> => {
     try {
-      const response = await fetch(`${API_BASE_URL}/patients/${patientId}`);
+      const response = await fetch(`${API_BASE_URL}/patients`);
       
       if (!response.ok) {
-        if (response.status === 404) {
-          return null; // Patient not found
-        }
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to get patient');
+        throw new Error(`Failed to fetch patients: ${response.status}`);
       }
       
-      return await response.json();
+      const data = await response.json();
+      console.log('Fetched patients from API:', data.patients);
+      return data.patients || [];
     } catch (error) {
-      //console.error('Error fetching patient:', error);
-      return null;
+      console.error('Error fetching all patients:', error);
+      throw error;
     }
   };
 
@@ -103,262 +102,153 @@ const AdminPatients: React.FC = () => {
       
       return await response.json();
     } catch (error) {
-      //console.error('Error updating patient:', error);
+      console.error('Error updating patient:', error);
       throw error;
     }
   };
 
-  // Create a patient in API
-  const createPatient = async (patientData: Omit<PatientData, 'id'>): Promise<PatientData | null> => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/patients`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(patientData)
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to create patient');
-      }
-      
-      return await response.json();
-    } catch (error) {
-      //console.error('Error creating patient:', error);
-      throw error;
-    }
-  };
-
-  // Handle opening the edit modal
-  const handleEditPatient = async (patientId: string) => {
-    try {
-      // Find patient in local state first
-      const localPatient = patients.find(p => p.id === patientId);
-      if (!localPatient) {
-        //console.error('Patient not found in local state');
-        return;
-      }
-      
-      // First try to get complete patient data by userId (email)
-      //console.log('Trying to fetch patient by userId:', localPatient.email);
-      let patientData = null;
-      
-      try {
-        // Primary lookup method - by userId
-        const response = await fetch(`${API_BASE_URL}/patients/user/${localPatient.email}`);
-        //console.log('userId lookup response status:', response.status);
-        
-        if (response.ok) {
-          patientData = await response.json();
-          //console.log('Found patient by userId:', patientData);
-        } else {
-          // If specific test patient, try the known ID
-          if (localPatient.email.toLowerCase() === 'testing1@mail.com') {
-            //console.log('Using known API ID for testing1@mail.com');
-            const knownPatientResponse = await fetch(`${API_BASE_URL}/patients/5isdoj2aCmVCzmB9greZ`);
-            if (knownPatientResponse.ok) {
-              patientData = await knownPatientResponse.json();
-              //console.log('Retrieved patient with known ID:', patientData);
-            }
-          }
-        }
-      } catch (error) {
-        //console.error('Error looking up patient by userId:', error);
-      }
-      
-      // If patient not found by userId, try to create
-      if (!patientData) {
-        try {
-          // Try to create the patient
-          patientData = await createPatient({
-            name: localPatient.name,
-            email: localPatient.email,
-            phone: localPatient.phone || '',
-            userId: localPatient.email // Use patient's email as userId
-          });
-          
-          //console.log('Created new patient in API:', patientData);
-        } catch (createError: any) {
-          //console.error('Error creating patient in API:', createError);
-          
-          // If error suggests userId already exists, try to fetch again by userId
-          if (createError.message && createError.message.includes('already exists')) {
-            //console.log('Detected existing userId, retrying fetch by userId');
-            try {
-              const retryResponse = await fetch(`${API_BASE_URL}/patients/user/${localPatient.email}`);
-              if (retryResponse.ok) {
-                patientData = await retryResponse.json();
-                //console.log('Retrieved existing patient by userId after creation error:', patientData);
-              }
-            } catch (retryError) {
-              //console.error('Error on retry lookup:', retryError);
-            }
-          }
-          
-          // If still no data, try the fallback approach with all patients
-          if (!patientData) {
-            try {
-              //console.log('Attempting to get all patients as fallback');
-              const allPatientsResponse = await fetch(`${API_BASE_URL}/patients`);
-              if (allPatientsResponse.ok) {
-                const allPatientsData = await allPatientsResponse.json();
-                
-                // Try to find the patient by email
-                const foundPatient = allPatientsData.patients.find(
-                  (p: any) => p.email.toLowerCase() === localPatient.email.toLowerCase()
-                );
-                
-                if (foundPatient) {
-                  //console.log('Found patient in full list:', foundPatient);
-                  patientData = foundPatient;
-                }
-              }
-            } catch (allPatientsError) {
-              //console.error('Error fetching all patients:', allPatientsError);
-            }
-          }
-        }
-      }
-      
-      // If still no data, fall back to local
-      if (!patientData) {
-        //console.log('All API attempts failed, falling back to local data');
-        patientData = {
-          id: localPatient.id,
-          name: localPatient.name,
-          email: localPatient.email,
-          phone: localPatient.phone || ''
-        };
-      }
-      
-      if (patientData) {
-        setEditingPatient(patientData);
-        setIsEditModalOpen(true);
-      } else {
-        //console.error('No patient data available');
-      }
-    } catch (error) {
-      //console.error('Error preparing patient for edit:', error);
-    }
-  };
-
-  // Handle saving patient edits
-  const handleSavePatient = async () => {
-    if (!editingPatient) return;
-    
-    setIsSaving(true);
-    setEditError(null);
-    
-    try {
-      const updatedPatient = await updatePatient(editingPatient.id, {
-        name: editingPatient.name,
-        email: editingPatient.email,
-        phone: editingPatient.phone,
-        address: editingPatient.address,
-        dateOfBirth: editingPatient.dateOfBirth
-      });
-      
-      if (updatedPatient) {
-        // Update patient in local state
-        setPatients(prevPatients => 
-          prevPatients.map(p => 
-            p.id === updatedPatient.id 
-              ? { 
-                  ...p, 
-                  name: updatedPatient.name, 
-                  email: updatedPatient.email, 
-                  phone: updatedPatient.phone,
-                  patientData: updatedPatient 
-                } 
-              : p
-          )
-        );
-        
-        setIsEditModalOpen(false);
-        setEditingPatient(null);
-      }
-    } catch (error: any) {
-      setEditError(error.message || 'Failed to save patient');
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  // Load all appointments and doctors
+  // Load all data: patients, appointments, and doctors
   const loadData = useCallback(async () => {
     setIsLoading(true);
     try {
+      // Fetch appointments first
       if (fetchAllAppointments) {
+        console.log('Fetching all appointments...');
         await fetchAllAppointments();
+        console.log('Appointments fetched successfully');
       }
+      
+      // Fetch doctors if needed
       if (doctors.length === 0) {
         await fetchDoctors();
       }
+      
+      // Fetch patients directly from API
+      const apiPatients = await fetchAllPatients();
+      
+      // Process API patients and merge with appointment data
+      processPatients(apiPatients);
     } catch (err) {
       console.error('Error loading data:', err);
     } finally {
       setIsLoading(false);
     }
   }, [fetchAllAppointments, fetchDoctors, doctors.length]);
-
+  
+  // Process patients from API and enhance with appointment data
+  const processPatients = useCallback((apiPatients: PatientData[]) => {
+    if (!apiPatients.length) return;
+    
+    console.log('Processing patients with appointments...');
+    console.log('Total appointments available:', appointments.length);
+    
+    // Create a map of normalized emails to appointments for efficient lookup
+    const emailToAppointmentsMap = new Map<string, Appointment[]>();
+    
+    // Track unmatched appointments for debugging
+    const unmatchedAppointments: Appointment[] = [];
+    
+    // First, normalize all appointment emails and group them
+    appointments.forEach(appointment => {
+      // Normalize the email by trimming and lowercasing
+      const normalizedEmail = appointment.patientEmail.trim().toLowerCase();
+      
+      if (normalizedEmail) {
+        if (!emailToAppointmentsMap.has(normalizedEmail)) {
+          emailToAppointmentsMap.set(normalizedEmail, [appointment]);
+        } else {
+          emailToAppointmentsMap.get(normalizedEmail)?.push(appointment);
+        }
+      } else {
+        unmatchedAppointments.push(appointment);
+      }
+    });
+    
+    console.log('Email to appointments map created with', emailToAppointmentsMap.size, 'unique emails');
+    if (unmatchedAppointments.length) {
+      console.warn('Found', unmatchedAppointments.length, 'appointments with missing emails');
+    }
+    
+    const enhancedPatients: Patient[] = apiPatients.map(patient => {
+      // Normalize the patient email for lookup
+      const normalizedEmail = patient.email.trim().toLowerCase();
+      const userId = patient.userId?.trim().toLowerCase();
+      
+      // Look for appointments by normalized email or userId
+      let patientAppointments: Appointment[] = [];
+      
+      if (emailToAppointmentsMap.has(normalizedEmail)) {
+        patientAppointments = emailToAppointmentsMap.get(normalizedEmail) || [];
+        console.log(`Found ${patientAppointments.length} appointments for ${patient.name} using email ${normalizedEmail}`);
+      } else if (userId && emailToAppointmentsMap.has(userId)) {
+        // Try userId as a fallback
+        patientAppointments = emailToAppointmentsMap.get(userId) || [];
+        console.log(`Found ${patientAppointments.length} appointments for ${patient.name} using userId ${userId}`);
+      } else {
+        // Special case for known test accounts
+        if (normalizedEmail === 'testing11@gmail.com' && emailToAppointmentsMap.has('testing1@mail.com')) {
+          patientAppointments = emailToAppointmentsMap.get('testing1@mail.com') || [];
+          console.log(`Special case: Found ${patientAppointments.length} appointments for test account ${patient.name}`);
+        } else {
+          console.log(`No appointments found for patient ${patient.name} (${normalizedEmail})`);
+        }
+      }
+      
+      // Sort appointments by date, newest first
+      patientAppointments.sort((a, b) => {
+        const dateA = new Date(a.dateTime || `${a.date}T${a.time}`);
+        const dateB = new Date(b.dateTime || `${b.date}T${b.time}`);
+        return dateB.getTime() - dateA.getTime();
+      });
+      
+      // Get status flags
+      const hasConfirmed = patientAppointments.some(a => a.status === 'confirmed');
+      const hasPending = patientAppointments.some(a => a.status === 'pending');
+      const hasCancelled = patientAppointments.some(a => a.status === 'cancelled');
+      
+      // Get most recent appointment for date and primary status
+      const mostRecentAppointment = patientAppointments.length > 0 ? patientAppointments[0] : null;
+      
+      return {
+        id: normalizedEmail, // Use normalized email as identifier
+        name: patient.name,
+        email: patient.email,
+        phone: patient.phone || 'N/A',
+        appointmentsCount: patientAppointments.length,
+        lastAppointment: mostRecentAppointment 
+          ? (mostRecentAppointment.dateTime || `${mostRecentAppointment.date}T${mostRecentAppointment.time}`)
+          : new Date().toISOString(), // Fallback to current date if no appointments
+        status: mostRecentAppointment ? mostRecentAppointment.status : 'none', 
+        hasConfirmed,
+        hasPending,
+        hasCancelled,
+        patientData: patient, // Store the full API patient data
+        appointments: patientAppointments // Store the actual appointments for this patient
+      };
+    });
+    
+    // Log summary for debugging
+    const totalAppointmentsAssigned = enhancedPatients.reduce((sum, p) => sum + p.appointmentsCount, 0);
+    console.log(`Assigned ${totalAppointmentsAssigned} appointments out of ${appointments.length} total`);
+    
+    console.log('Processed patients list:', enhancedPatients);
+    setPatients(enhancedPatients);
+  }, [appointments]);
+  
   // Load data on component mount
   useEffect(() => {
     loadData();
   }, [loadData]);
-
-  // Process appointments into patient list
+  
+  // Update patients when appointments change
   useEffect(() => {
-    if (appointments.length > 0) {
-      const patientMap = new Map<string, Patient>();
-      
-      // First, collect all appointments by patient
-      const patientAppointments = new Map<string, Appointment[]>();
-      
-      appointments.forEach(appointment => {
-        const patientId = appointment.patientEmail.toLowerCase(); // Use email as unique identifier
-        if (!patientAppointments.has(patientId)) {
-          patientAppointments.set(patientId, [appointment]);
-        } else {
-          patientAppointments.get(patientId)?.push(appointment);
-        }
-      });
-      
-      // Then process each patient with all their appointments
-      patientAppointments.forEach((patientAppts, patientId) => {
-        // Sort by date, newest first
-        patientAppts.sort((a, b) => {
-          const dateA = new Date(a.dateTime || `${a.date}T${a.time}`);
-          const dateB = new Date(b.dateTime || `${b.date}T${b.time}`);
-          return dateB.getTime() - dateA.getTime();
-        });
-        
-        // Get the most recent appointment
-        const mostRecentAppointment = patientAppts[0];
-        
-        // Count appointments by status and check if patient has any of each status
-        const hasConfirmed = patientAppts.some(a => a.status === 'confirmed');
-        const hasPending = patientAppts.some(a => a.status === 'pending');
-        const hasCancelled = patientAppts.some(a => a.status === 'cancelled');
-        
-        patientMap.set(patientId, {
-          id: patientId,
-          name: mostRecentAppointment.patientName,
-          email: mostRecentAppointment.patientEmail,
-          phone: mostRecentAppointment.patientPhone || 'N/A',
-          appointmentsCount: patientAppts.length,
-          lastAppointment: mostRecentAppointment.dateTime || `${mostRecentAppointment.date}T${mostRecentAppointment.time}`,
-          status: mostRecentAppointment.status, // Keep for display
-          hasConfirmed,
-          hasPending,
-          hasCancelled
-        });
-      });
-      
-      setPatients(Array.from(patientMap.values()));
+    if (patients.length > 0) {
+      // We already have patient data, just refresh the appointment-related data
+      fetchAllPatients()
+        .then(apiPatients => processPatients(apiPatients))
+        .catch(err => console.error('Error refreshing patients:', err));
     }
-  }, [appointments]);
+  }, [appointments, processPatients]);
 
   // Get doctor's name by ID
   const getDoctorNameById = (doctorId: string): string => {
@@ -384,26 +274,25 @@ const AdminPatients: React.FC = () => {
     return matchesSearch && matchesStatus;
   });
 
-  // Get patient's appointments
+  // Get patient's appointments - use the stored appointments rather than filtering again
   const getPatientAppointments = (patientEmail: string): Appointment[] => {
-    // First filter by patient email
-    let patientAppointments = appointments.filter(appointment => 
-      appointment.patientEmail.toLowerCase() === patientEmail.toLowerCase()
-    );
+    const patient = patients.find(p => p.email.toLowerCase() === patientEmail.toLowerCase());
+    
+    if (!patient || !patient.appointments) {
+      return [];
+    }
     
     // If there's a status filter, only show appointments with that status
+    let patientAppointments = patient.appointments;
+    
     if (statusFilter) {
       patientAppointments = patientAppointments.filter(appointment => 
         appointment.status === statusFilter
       );
     }
     
-    // Sort by date, newest first
-    return patientAppointments.sort((a, b) => {
-      const dateA = new Date(a.dateTime || `${a.date}T${a.time}`);
-      const dateB = new Date(b.dateTime || `${b.date}T${b.time}`);
-      return dateB.getTime() - dateA.getTime();
-    });
+    // Return already sorted appointments
+    return patientAppointments;
   };
 
   // Format appointment date
@@ -426,6 +315,59 @@ const AdminPatients: React.FC = () => {
     }
   };
 
+  // Handle saving patient edits
+  const handleSavePatient = async () => {
+    if (!editingPatient) return;
+    
+    setIsSaving(true);
+    setEditError(null);
+    
+    try {
+      const updatedPatient = await updatePatient(editingPatient.id, {
+        name: editingPatient.name,
+        email: editingPatient.email,
+        phone: editingPatient.phone,
+        address: editingPatient.address,
+        dateOfBirth: editingPatient.dateOfBirth
+      });
+      
+      if (updatedPatient) {
+        console.log('Patient updated successfully:', updatedPatient);
+        
+        // Close the modal
+        setIsEditModalOpen(false);
+        setEditingPatient(null);
+        
+        // Force a full data refresh to get the latest from API
+        loadData();
+      }
+    } catch (error: any) {
+      console.error('Failed to update patient:', error);
+      setEditError(error.message || 'Failed to save patient');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // Fix for the refresh button - make it more aggressive but handle errors properly
+  const handleRefresh = async () => {
+    console.log('Performing aggressive refresh...');
+    setIsLoading(true);
+    
+    try {
+      // Clear current state to avoid stale data
+      setPatients([]);
+      
+      // Directly call loadData which has the proper error handling
+      await loadData();
+      console.log('Refresh completed successfully');
+    } catch (error) {
+      console.error('Refresh failed:', error);
+      // Set isLoading to false in case of error
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="container mx-auto px-4 py-6 max-w-6xl">
       <AdminNavbar />
@@ -433,7 +375,7 @@ const AdminPatients: React.FC = () => {
       <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-2">
         <h1 className="text-2xl font-bold text-gray-900 text-center sm:text-left">Patient Management</h1>
         <button
-          onClick={loadData}
+          onClick={handleRefresh}
           disabled={isLoading}
           className={`px-4 py-2 rounded ${isLoading ? 'bg-gray-300' : 'bg-blue-500 text-white hover:bg-blue-600'}`}
         >
@@ -531,7 +473,10 @@ const AdminPatients: React.FC = () => {
                             className="ml-2 text-gray-400 hover:text-blue-500"
                             onClick={(e) => {
                               e.stopPropagation();
-                              handleEditPatient(patient.id);
+                              if (patient.patientData) {
+                                setEditingPatient(patient.patientData);
+                                setIsEditModalOpen(true);
+                              }
                             }}
                           >
                             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -549,7 +494,7 @@ const AdminPatients: React.FC = () => {
                       {patient.appointmentsCount}
                       {statusFilter && (
                         <span className="ml-2 text-xs">
-                          ({getPatientAppointments(patient.id).length} {statusFilter})
+                          ({getPatientAppointments(patient.email).length} {statusFilter})
                         </span>
                       )}
                     </td>
@@ -583,7 +528,7 @@ const AdminPatients: React.FC = () => {
                             )}
                           </h3>
                           
-                          {getPatientAppointments(patient.id).length === 0 ? (
+                          {getPatientAppointments(patient.email).length === 0 ? (
                             <p className="text-sm text-gray-500">
                               {statusFilter 
                                 ? `No ${statusFilter} appointments found.` 
@@ -592,7 +537,7 @@ const AdminPatients: React.FC = () => {
                           ) : (
                             <div className="bg-white shadow overflow-hidden sm:rounded-md">
                               <ul className="divide-y divide-gray-200">
-                                {getPatientAppointments(patient.id).map((appointment) => (
+                                {getPatientAppointments(patient.email).map((appointment) => (
                                   <li key={appointment.id} className="px-4 py-4 sm:px-6">
                                     <div className="flex items-center justify-between">
                                       <div className="flex-1 min-w-0">
@@ -680,7 +625,13 @@ const AdminPatients: React.FC = () => {
                       </div>
                       <button 
                         className="text-gray-400 hover:text-blue-500"
-                        onClick={() => handleEditPatient(patient.id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (patient.patientData) {
+                            setEditingPatient(patient.patientData);
+                            setIsEditModalOpen(true);
+                          }
+                        }}
                       >
                         <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
@@ -703,7 +654,7 @@ const AdminPatients: React.FC = () => {
                           {patient.appointmentsCount}
                           {statusFilter && (
                             <span className="ml-2 text-xs">
-                              ({getPatientAppointments(patient.id).length} {statusFilter})
+                              ({getPatientAppointments(patient.email).length} {statusFilter})
                             </span>
                           )}
                         </span>
@@ -718,8 +669,11 @@ const AdminPatients: React.FC = () => {
                     
                     <div className="mt-3 flex justify-between items-center">
                       <button
-                        onClick={() => setSelectedPatient(selectedPatient === patient.id ? null : patient.id)}
-                        className="inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-blue-700 bg-blue-100 hover:bg-blue-200"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedPatient(selectedPatient === patient.id ? null : patient.id);
+                        }}
+                        className="inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs leading-5 font-medium rounded text-blue-700 bg-blue-100 hover:bg-blue-200"
                       >
                         {selectedPatient === patient.id ? 'Hide Details' : 'View Details'}
                       </button>
@@ -737,7 +691,7 @@ const AdminPatients: React.FC = () => {
                           )}
                         </h3>
 
-                        {getPatientAppointments(patient.id).length === 0 ? (
+                        {getPatientAppointments(patient.email).length === 0 ? (
                           <p className="text-sm text-gray-500">
                             {statusFilter 
                               ? `No ${statusFilter} appointments found.` 
@@ -745,7 +699,7 @@ const AdminPatients: React.FC = () => {
                           </p>
                         ) : (
                           <ul className="divide-y divide-gray-200 border border-gray-200 rounded-md">
-                            {getPatientAppointments(patient.id).map((appointment) => (
+                            {getPatientAppointments(patient.email).map((appointment) => (
                               <li key={appointment.id} className="px-4 py-3">
                                 <div>
                                   <div className="flex justify-between mb-1">
