@@ -50,7 +50,7 @@ const AppointmentList: React.FC = () => {
     const userId = getUserId();
     if (!userId) return;
     
-    console.log("Fetching appointments for user:", userId);
+    //console.log("Fetching appointments for user:", userId);
     setRefreshing(true);
     
     // Fetch doctors if not already loaded
@@ -336,7 +336,7 @@ const AppointmentList: React.FC = () => {
         
         // No need to refresh appointments since the store is already updated
       } catch (error) {
-        console.error('Error cancelling appointment:', error);
+        //console.error('Error cancelling appointment:', error);
         // Show error message to the user
         alert('Failed to cancel the appointment. Please try again.');
       }

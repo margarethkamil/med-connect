@@ -175,17 +175,17 @@ export const useDoctorStore = create<DoctorState>((set, get) => {
         // Fetch availability for each doctor
         await Promise.all(doctorIds.map(async (doctorId) => {
           try {
-            console.log(`Fetching availability for doctor ${doctorId}`);
+            //console.log(`Fetching availability for doctor ${doctorId}`);
             const availability = await getDoctorAvailability(doctorId);
-            console.log(`Received availability for doctor ${doctorId}:`, availability);
+            //console.log(`Received availability for doctor ${doctorId}:`, availability);
             
             // The API already returns an array of ISO datetime strings
             // No need for processing, just use the array directly
             availabilitiesMap[doctorId] = availability;
             
-            console.log(`Processed availability for doctor ${doctorId}:`, availability);
+            //console.log(`Processed availability for doctor ${doctorId}:`, availability);
           } catch (err) {
-            console.error(`Error fetching availability for doctor ${doctorId}:`, err);
+            //console.error(`Error fetching availability for doctor ${doctorId}:`, err);
             availabilitiesMap[doctorId] = [];
           }
         }));
@@ -195,7 +195,7 @@ export const useDoctorStore = create<DoctorState>((set, get) => {
         // Re-apply filters with new availability data
         applyFilters();
       } catch (error) {
-        console.error('Error fetching availabilities:', error);
+        //console.error('Error fetching availabilities:', error);
       }
     },
 
@@ -237,7 +237,7 @@ export const useDoctorStore = create<DoctorState>((set, get) => {
       const currentAvailabilities = { ...get().doctorsWithAvailability };
       currentAvailabilities[doctorId] = slots;
       
-      console.log(`Setting availability for doctor ${doctorId}:`, slots);
+      //console.log(`Setting availability for doctor ${doctorId}:`, slots);
       set({ doctorsWithAvailability: currentAvailabilities });
       
       // Re-apply filters with the new availability data

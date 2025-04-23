@@ -39,7 +39,7 @@ export const trackError = (errorSource: string, errorMessage: string, errorDetai
   const label = `User:${userId} | Source:${errorSource} | Message:${errorMessage}`;
   const errorData = errorDetails ? JSON.stringify(errorDetails).substring(0, 500) : '';
   
-  console.error(`Analytics Error: ${label} | Details: ${errorData}`);
+  //console.error(`Analytics Error: ${label} | Details: ${errorData}`);
   trackEvent('Error', errorSource, label);
 };
 
@@ -89,44 +89,3 @@ export const trackCrudEvents = {
     trackEvent('Appointment', 'Cancel', `User:${userId} | Appointment:${appointmentId}`);
   }
 };
-
-/*
-Example usage:
-
-// In App.tsx (once on mount):
-useEffect(() => {
-  initAnalytics();
-}, []);
-
-// On route change:
-useEffect(() => {
-  trackPageView(window.location.pathname + window.location.search);
-}, [location.pathname]);
-
-// On custom actions (e.g., booking):
-trackEvent('Booking', 'Doctor Booked', doctorName);
-
-// For doctor actions
-import { trackCrudEvents } from '../services/analytics';
-
-// In your doctor creation handler:
-trackCrudEvents.createDoctor(doctorName);
-
-// In your appointment booking handler:
-trackCrudEvents.createAppointment(doctorName, dateTime);
-
-// In your appointment cancellation handler:
-trackCrudEvents.cancelAppointment(appointmentId);
-
-// For tracking errors:
-import { trackError } from '../services/analytics';
-try {
-  // Some code that might fail
-} catch (error) {
-  trackError('ComponentName', error.message, error);
-}
-
-// For tracking user login:
-import { trackUserEvents } from '../services/analytics';
-trackUserEvents.login(userEmail, isAdmin);
-*/ 

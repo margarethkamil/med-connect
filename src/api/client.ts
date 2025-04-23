@@ -27,8 +27,8 @@ export const getDoctors = async (includeAvailability: boolean = true): Promise<D
   const doctors = await response.json();
   
   // Log data received for debugging
-  console.log(`Received ${doctors.length} doctors with availability data:`, 
-    includeAvailability ? 'included' : 'not included');
+  //console.log(`Received ${doctors.length} doctors with availability data:`, 
+    //includeAvailability ? 'included' : 'not included');
   
   return doctors;
 };
@@ -67,16 +67,16 @@ export const bookAppointment = async (bookingData: BookingRequest): Promise<Appo
 
 // Get user appointments
 export const getUserAppointments = async (userId: string): Promise<Appointment[]> => {
-  console.log(`Fetching appointments for user: ${userId}`);
+  //console.log(`Fetching appointments for user: ${userId}`);
   
   if (!userId) {
-    console.error('getUserAppointments: userId is empty');
+    //console.error('getUserAppointments: userId is empty');
     return [];
   }
   
   try {
     const url = USER_APPOINTMENTS_URL(userId);
-    console.log(`GET request to: ${url}`);
+    //console.log(`GET request to: ${url}`);
     
     const response = await fetch(url);
     
@@ -87,10 +87,10 @@ export const getUserAppointments = async (userId: string): Promise<Appointment[]
     }
     
     const data = await response.json();
-    console.log(`Received ${data.length} appointments:`, data);
+    //console.log(`Received ${data.length} appointments:`, data);
     return data;
   } catch (error) {
-    console.error('Error in getUserAppointments:', error);
+    //console.error('Error in getUserAppointments:', error);
     throw error;
   }
 };
@@ -102,7 +102,7 @@ export const checkSlotAvailable = async (doctorId: string, dateTime: string): Pr
     // Need to ensure dateTime is in the format expected by the API (YYYY-MM-DDTHH:MM)
     // The function expects a properly formatted dateTime string
     const url = CHECK_SLOT_AVAILABLE_URL(doctorId, dateTime);
-    console.log(`Checking slot availability: ${url}`);
+    //console.log(`Checking slot availability: ${url}`);
     
     const response = await fetch(url);
     
@@ -113,12 +113,12 @@ export const checkSlotAvailable = async (doctorId: string, dateTime: string): Pr
     }
     
     const result = await response.json();
-    console.log(`Slot availability result:`, result);
+    //console.log(`Slot availability result:`, result);
     
     // The API returns { isAvailable: true/false }
     return result.isAvailable === true;
   } catch (error) {
-    console.error('Error checking slot availability:', error);
+    //console.error('Error checking slot availability:', error);
     // In case of error, assume the slot is not available to prevent double booking
     return false;
   }
@@ -130,11 +130,11 @@ export const cancelAppointment = async (appointmentId: string): Promise<Appointm
     throw new Error('appointmentId is required');
   }
   
-  console.log(`Cancelling appointment: ${appointmentId}`);
+  //console.log(`Cancelling appointment: ${appointmentId}`);
   
   try {
     const url = `${APPOINTMENTS_URL}/${appointmentId}`;
-    console.log(`DELETE request to: ${url}`);
+    //console.log(`DELETE request to: ${url}`);
     
     // According to the test script, we use DELETE method to cancel
     const response = await fetch(url, {
@@ -151,7 +151,7 @@ export const cancelAppointment = async (appointmentId: string): Promise<Appointm
     }
     
     const data = await response.json();
-    console.log('Appointment cancelled successfully:', data);
+    //console.log('Appointment cancelled successfully:', data);
     return data;
   } catch (error) {
     console.error('Error in cancelAppointment:', error);
@@ -165,11 +165,11 @@ export const updateAppointmentStatus = async (appointmentId: string, status: str
     throw new Error('appointmentId is required');
   }
   
-  console.log(`Updating appointment ${appointmentId} status to: ${status}`);
+  //console.log(`Updating appointment ${appointmentId} status to: ${status}`);
   
   try {
     const url = `${APPOINTMENTS_URL}/${appointmentId}`;
-    console.log(`PUT request to: ${url}`);
+    //console.log(`PUT request to: ${url}`);
     
     const response = await fetch(url, {
       method: 'PUT',
@@ -186,7 +186,7 @@ export const updateAppointmentStatus = async (appointmentId: string, status: str
     }
     
     const data = await response.json();
-    console.log('Appointment updated successfully:', data);
+    //console.log('Appointment updated successfully:', data);
     return data;
   } catch (error) {
     console.error('Error in updateAppointmentStatus:', error);
@@ -204,7 +204,7 @@ export const getAllAppointments = async (options: {
   hasMore: boolean;
   lastDoc: string | null;
 }> => {
-  console.log(`Fetching all appointments with options:`, options);
+  //console.log(`Fetching all appointments with options:`, options);
   
   try {
     // Build query string
@@ -216,7 +216,7 @@ export const getAllAppointments = async (options: {
     const queryString = queryParams.toString();
     const url = `${ADMIN_APPOINTMENTS_URL}${queryString ? `?${queryString}` : ''}`;
     
-    console.log(`GET request to: ${url}`);
+    //console.log(`GET request to: ${url}`);
     
     const response = await fetch(url);
     
@@ -227,7 +227,7 @@ export const getAllAppointments = async (options: {
     }
     
     const data = await response.json();
-    console.log(`Received ${data.appointments.length} admin appointments:`, data);
+    //console.log(`Received ${data.appointments.length} admin appointments:`, data);
     return data;
   } catch (error) {
     console.error('Error in getAllAppointments:', error);
@@ -259,11 +259,11 @@ export const updateCompleteAppointment = async (
     validatedData.status = 'pending';
   }
   
-  console.log(`Updating appointment ${appointmentId} with validated data:`, validatedData);
+  //console.log(`Updating appointment ${appointmentId} with validated data:`, validatedData);
   
   try {
     const url = `${APPOINTMENTS_URL}/${appointmentId}`;
-    console.log(`PUT request to: ${url}`);
+    //console.log(`PUT request to: ${url}`);
     
     const response = await fetch(url, {
       method: 'PUT',
@@ -280,7 +280,7 @@ export const updateCompleteAppointment = async (
     }
     
     const updatedAppointment = await response.json();
-    console.log('Appointment updated successfully:', updatedAppointment);
+    //console.log('Appointment updated successfully:', updatedAppointment);
     return updatedAppointment;
   } catch (error) {
     console.error('Error in updateCompleteAppointment:', error);
@@ -312,11 +312,11 @@ export const updateDoctor = async (
     processedData.fee = parseFloat(processedData.fee);
   }
   
-  console.log(`Updating doctor ${doctorId} with data:`, processedData);
+  //console.log(`Updating doctor ${doctorId} with data:`, processedData);
   
   try {
     const url = DOCTOR_DETAILS_URL(doctorId);
-    console.log(`PUT request to: ${url}`);
+    //console.log(`PUT request to: ${url}`);
     
     const response = await fetch(url, {
       method: 'PUT',
@@ -333,7 +333,7 @@ export const updateDoctor = async (
     }
     
     const updatedDoctor = await response.json();
-    console.log('Doctor updated successfully:', updatedDoctor);
+    //console.log('Doctor updated successfully:', updatedDoctor);
     return updatedDoctor;
   } catch (error) {
     console.error('Error in updateDoctor:', error);
@@ -360,11 +360,11 @@ export const createDoctor = async (
     processedData.fee = parseFloat(processedData.fee);
   }
   
-  console.log(`Creating new doctor with data:`, processedData);
+  //console.log(`Creating new doctor with data:`, processedData);
   
   try {
     const url = DOCTORS_URL;
-    console.log(`POST request to: ${url}`);
+    //console.log(`POST request to: ${url}`);
     
     const response = await fetch(url, {
       method: 'POST',
@@ -381,7 +381,7 @@ export const createDoctor = async (
     }
     
     const newDoctor = await response.json();
-    console.log('Doctor created successfully:', newDoctor);
+    //console.log('Doctor created successfully:', newDoctor);
     return newDoctor;
   } catch (error) {
     console.error('Error in createDoctor:', error);
@@ -395,11 +395,11 @@ export const deleteDoctor = async (doctorId: string): Promise<void> => {
     throw new Error('doctorId is required');
   }
   
-  console.log(`Deleting doctor: ${doctorId}`);
+  //console.log(`Deleting doctor: ${doctorId}`);
   
   try {
     const url = DOCTOR_DETAILS_URL(doctorId);
-    console.log(`DELETE request to: ${url}`);
+    //console.log(`DELETE request to: ${url}`);
     
     const response = await fetch(url, {
       method: 'DELETE',
@@ -414,7 +414,7 @@ export const deleteDoctor = async (doctorId: string): Promise<void> => {
       throw new Error(`Failed to delete doctor: ${response.status} ${errorText}`);
     }
     
-    console.log('Doctor deleted successfully');
+    //console.log('Doctor deleted successfully');
   } catch (error) {
     console.error('Error in deleteDoctor:', error);
     throw error;

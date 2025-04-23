@@ -80,7 +80,7 @@ const AdminPatients: React.FC = () => {
       
       return await response.json();
     } catch (error) {
-      console.error('Error fetching patient:', error);
+      //console.error('Error fetching patient:', error);
       return null;
     }
   };
@@ -103,7 +103,7 @@ const AdminPatients: React.FC = () => {
       
       return await response.json();
     } catch (error) {
-      console.error('Error updating patient:', error);
+      //console.error('Error updating patient:', error);
       throw error;
     }
   };
@@ -126,7 +126,7 @@ const AdminPatients: React.FC = () => {
       
       return await response.json();
     } catch (error) {
-      console.error('Error creating patient:', error);
+      //console.error('Error creating patient:', error);
       throw error;
     }
   };
@@ -137,35 +137,35 @@ const AdminPatients: React.FC = () => {
       // Find patient in local state first
       const localPatient = patients.find(p => p.id === patientId);
       if (!localPatient) {
-        console.error('Patient not found in local state');
+        //console.error('Patient not found in local state');
         return;
       }
       
       // First try to get complete patient data by userId (email)
-      console.log('Trying to fetch patient by userId:', localPatient.email);
+      //console.log('Trying to fetch patient by userId:', localPatient.email);
       let patientData = null;
       
       try {
         // Primary lookup method - by userId
         const response = await fetch(`${API_BASE_URL}/patients/user/${localPatient.email}`);
-        console.log('userId lookup response status:', response.status);
+        //console.log('userId lookup response status:', response.status);
         
         if (response.ok) {
           patientData = await response.json();
-          console.log('Found patient by userId:', patientData);
+          //console.log('Found patient by userId:', patientData);
         } else {
           // If specific test patient, try the known ID
           if (localPatient.email.toLowerCase() === 'testing1@mail.com') {
-            console.log('Using known API ID for testing1@mail.com');
+            //console.log('Using known API ID for testing1@mail.com');
             const knownPatientResponse = await fetch(`${API_BASE_URL}/patients/5isdoj2aCmVCzmB9greZ`);
             if (knownPatientResponse.ok) {
               patientData = await knownPatientResponse.json();
-              console.log('Retrieved patient with known ID:', patientData);
+              //console.log('Retrieved patient with known ID:', patientData);
             }
           }
         }
       } catch (error) {
-        console.error('Error looking up patient by userId:', error);
+        //console.error('Error looking up patient by userId:', error);
       }
       
       // If patient not found by userId, try to create
@@ -179,28 +179,28 @@ const AdminPatients: React.FC = () => {
             userId: localPatient.email // Use patient's email as userId
           });
           
-          console.log('Created new patient in API:', patientData);
+          //console.log('Created new patient in API:', patientData);
         } catch (createError: any) {
-          console.error('Error creating patient in API:', createError);
+          //console.error('Error creating patient in API:', createError);
           
           // If error suggests userId already exists, try to fetch again by userId
           if (createError.message && createError.message.includes('already exists')) {
-            console.log('Detected existing userId, retrying fetch by userId');
+            //console.log('Detected existing userId, retrying fetch by userId');
             try {
               const retryResponse = await fetch(`${API_BASE_URL}/patients/user/${localPatient.email}`);
               if (retryResponse.ok) {
                 patientData = await retryResponse.json();
-                console.log('Retrieved existing patient by userId after creation error:', patientData);
+                //console.log('Retrieved existing patient by userId after creation error:', patientData);
               }
             } catch (retryError) {
-              console.error('Error on retry lookup:', retryError);
+              //console.error('Error on retry lookup:', retryError);
             }
           }
           
           // If still no data, try the fallback approach with all patients
           if (!patientData) {
             try {
-              console.log('Attempting to get all patients as fallback');
+              //console.log('Attempting to get all patients as fallback');
               const allPatientsResponse = await fetch(`${API_BASE_URL}/patients`);
               if (allPatientsResponse.ok) {
                 const allPatientsData = await allPatientsResponse.json();
@@ -211,12 +211,12 @@ const AdminPatients: React.FC = () => {
                 );
                 
                 if (foundPatient) {
-                  console.log('Found patient in full list:', foundPatient);
+                  //console.log('Found patient in full list:', foundPatient);
                   patientData = foundPatient;
                 }
               }
             } catch (allPatientsError) {
-              console.error('Error fetching all patients:', allPatientsError);
+              //console.error('Error fetching all patients:', allPatientsError);
             }
           }
         }
@@ -224,7 +224,7 @@ const AdminPatients: React.FC = () => {
       
       // If still no data, fall back to local
       if (!patientData) {
-        console.log('All API attempts failed, falling back to local data');
+        //console.log('All API attempts failed, falling back to local data');
         patientData = {
           id: localPatient.id,
           name: localPatient.name,
@@ -237,10 +237,10 @@ const AdminPatients: React.FC = () => {
         setEditingPatient(patientData);
         setIsEditModalOpen(true);
       } else {
-        console.error('No patient data available');
+        //console.error('No patient data available');
       }
     } catch (error) {
-      console.error('Error preparing patient for edit:', error);
+      //console.error('Error preparing patient for edit:', error);
     }
   };
 

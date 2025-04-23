@@ -37,10 +37,12 @@ doctor-booking/
 - Book appointments with doctors on available dates and times
 - Manage and view upcoming appointments
 - Cancel or reschedule existing appointments
+- Mobile-friendly navigation for access to all features on smaller devices
 
 ### Admin Features
 - Admin dashboard with calendar view of all appointments
 - Manage doctors (add, edit, delete)
+- Manage patients (view, edit patient details)
 - View and manage all appointments in the system
 - Filter appointments by status and doctor
 
@@ -50,6 +52,15 @@ The application uses a simple email-based authentication system:
 - User authentication via email
 - Role-based access (admin vs regular user)
 - Protected routes requiring authentication
+
+## Mobile Navigation
+
+The application includes a responsive mobile navigation system:
+- Hamburger menu icon positioned next to the MedConnect logo for easy access
+- Collapsible menu that shows/hides navigation options
+- Context-aware menu items (different options for admin vs regular users)
+- Smooth transitions and animations for a polished user experience
+- Auto-close on navigation to reduce user actions
 
 ## API Endpoints
 
@@ -71,6 +82,12 @@ The application uses the following API endpoints:
 - `POST /appointments` - Create a new appointment
 - `PUT /appointments/:id/status` - Update appointment status
 - `DELETE /appointments/:id` - Cancel/delete an appointment
+
+### Patient Endpoints
+- `GET /patients/:id` - Get details for a specific patient by ID
+- `GET /patients/user/:userId` - Get patient details by user ID (email)
+- `POST /patients` - Create a new patient
+- `PUT /patients/:id` - Update patient details
 
 ## Data Structures
 
@@ -152,6 +169,27 @@ interface BookingRequest {
 }
 ```
 
+### Patient
+```typescript
+interface PatientData {
+  id: string;
+  userId?: string;
+  name: string;
+  email: string;
+  phone: string;
+  address?: string;
+  dateOfBirth?: string;
+}
+```
+
+## Recent Updates
+
+- **Patient Management:** Added ability to create, view, and edit patient records
+- **Mobile Navigation:** Implemented responsive menu system for all screen sizes
+- **Appointments UI Enhancement:** Redesigned appointments page with improved calendar and visualization
+- **Doctor Filtering:** Enhanced doctor filtering by availability and specialty
+- **Optimized Doctor Cards:** Improved performance and visual design of doctor listing
+
 ## Getting Started
 
 1. Clone the repository
@@ -162,7 +200,7 @@ interface BookingRequest {
 ## Backend
 
 The application is fully functional and deployed online, using a Firebase backend with the following base URL:
-Developed 
+
 `https://us-central1-doctor-booking-backend-5c6aa.cloudfunctions.net/api`
 
 ## Doctor Booking Backend – Tech Stack & Architecture
@@ -176,6 +214,7 @@ Developed
 
 **Key Features:**
 - RESTful API for managing doctors, appointments, and availability.
+- Patient CRUD operations for user management.
 - Appointment booking, cancellation, and status management.
 - Admin endpoints for listing and filtering all appointments.
 - CORS enabled for seamless frontend-backend communication.

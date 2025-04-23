@@ -121,8 +121,8 @@ const AdminDoctors: React.FC = () => {
       
       if (editingDoctor) {
         // Update existing doctor
-        console.log('Updating doctor:', editingDoctor.id);
-        console.log('Update data:', doctorData);
+        // console.log('Updating doctor:', editingDoctor.id);
+        // console.log('Update data:', doctorData);
         
         await updateDoctorDetails(editingDoctor.id, doctorData);
         
@@ -130,8 +130,8 @@ const AdminDoctors: React.FC = () => {
         trackCrudEvents.updateDoctor(editingDoctor.id, doctorData.name);
       } else {
         // Create new doctor
-        console.log('Creating new doctor');
-        console.log('Doctor data:', doctorData);
+        // console.log('Creating new doctor');
+        // console.log('Doctor data:', doctorData);
         
         await createNewDoctor(doctorData);
         
@@ -146,7 +146,7 @@ const AdminDoctors: React.FC = () => {
       // Refresh the doctor list
       fetchData();
     } catch (error) {
-      console.error('Error saving doctor:', error);
+      //console.error('Error saving doctor:', error);
       setUpdateError(error instanceof Error ? error.message : 'Failed to save doctor information');
     }
   };
@@ -175,7 +175,7 @@ const AdminDoctors: React.FC = () => {
     }
 
     try {
-      console.log('Deleting doctor:', doctorId);
+      // console.log('Deleting doctor:', doctorId);
       
       // Get doctor name before deletion for analytics
       const doctorToDelete = doctors.find(doc => doc.id === doctorId);
@@ -189,7 +189,7 @@ const AdminDoctors: React.FC = () => {
       // Refresh the doctor list
       fetchData();
     } catch (error) {
-      console.error('Error deleting doctor:', error);
+      //console.error('Error deleting doctor:', error);
       alert('Failed to delete doctor: ' + (error instanceof Error ? error.message : 'Unknown error'));
     }
   };

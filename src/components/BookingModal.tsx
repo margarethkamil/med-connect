@@ -277,7 +277,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ doctor, isOpen, onClose }) 
       setAvailableTimesForDate(availableSlots);
       setBookedTimesForDate(bookedSlots);
     } catch (error) {
-      console.error("Error checking time slot availability:", error);
+      //console.error("Error checking time slot availability:", error);
       // Fallback to showing all slots as available
       setAvailableTimesForDate([...BUSINESS_HOURS]);
       setBookedTimesForDate([]);
@@ -358,7 +358,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ doctor, isOpen, onClose }) 
       
       // We've already confirmed availability when selecting the time slot
       // But do a final quick check in case another user booked it in the meantime
-      console.log(`Performing final availability check for: ${dateTimeStr}`);
+      //console.log(`Performing final availability check for: ${dateTimeStr}`);
       const isStillAvailable = await checkSlotAvailable(doctor.id, dateTimeStr);
       
       if (!isStillAvailable) {
@@ -383,7 +383,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ doctor, isOpen, onClose }) 
         reason: formData.reason
       };
       
-      console.log('Booking appointment with data:', appointmentData);
+      //console.log('Booking appointment with data:', appointmentData);
       
       // Book the appointment
       await bookNewAppointment(appointmentData);
@@ -399,7 +399,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ doctor, isOpen, onClose }) 
       }, 2000);
       
     } catch (error) {
-      console.error('Error booking appointment:', error);
+      //console.error('Error booking appointment:', error);
       alert("Sorry, there was an error booking your appointment. Please try again.");
     } finally {
       setIsSubmitting(false);

@@ -150,7 +150,7 @@ const AdminCalendar: React.FC = () => {
       setHasMoreAppointments(result.hasMore);
       setLastDocId(result.lastDoc);
     } catch (error) {
-      console.error('Error loading more appointments:', error);
+      //console.error('Error loading more appointments:', error);
     } finally {
       setIsLoadingMore(false);
     }
@@ -295,8 +295,8 @@ const AdminCalendar: React.FC = () => {
       };
       
       // Log the update data for debugging
-      console.log('Updating appointment:', editingAppointment.id);
-      console.log('Update data:', updateData);
+      //console.log('Updating appointment:', editingAppointment.id);
+      //console.log('Update data:', updateData);
       
       // Update all editable fields
       await updateAppointmentDetails(editingAppointment.id, updateData);
@@ -311,7 +311,7 @@ const AdminCalendar: React.FC = () => {
       // Refetch the data to show the updates
       fetchData();
     } catch (error) {
-      console.error('Error updating appointment:', error);
+      //console.error('Error updating appointment:', error);
       setUpdateError(error instanceof Error ? error.message : 'Failed to update appointment');
     }
   };
