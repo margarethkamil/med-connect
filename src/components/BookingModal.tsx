@@ -315,9 +315,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ doctor, isOpen, onClose }) 
   // Handle time selection
   const handleTimeSelect = (time: string) => {
     if (!selectedDate) return;
-    
     setSelectedTime(time);
-    setCurrentStep('form');
   };
   
   // Handle form input changes
@@ -391,12 +389,6 @@ const BookingModal: React.FC<BookingModalProps> = ({ doctor, isOpen, onClose }) 
       // Set success state
       setAppointmentDateTime(fullDateTime);
       setCurrentStep('success');
-      
-      // Show the notification after modal closes
-      setTimeout(() => {
-        handleClose();
-        setShowNotification(true);
-      }, 2000);
       
     } catch (error) {
       //console.error('Error booking appointment:', error);
@@ -711,77 +703,18 @@ const BookingModal: React.FC<BookingModalProps> = ({ doctor, isOpen, onClose }) 
                 })}
               </div>
             </div>
-            
-            {/* Mobile scrolling time selector - visible only on small screens */}
-            <div className="mt-6 sm:hidden">
-              <h4 className="text-sm font-medium text-gray-700 mb-3 flex items-center">
-                <svg className="w-4 h-4 mr-1.5 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8h16M4 16h16" />
-                </svg>
-                Quick Select (scroll horizontally)
-              </h4>
-              <div className="rounded-md border border-blue-100 overflow-hidden">
-                <div className="overflow-x-auto bg-blue-50/50 px-2 py-3">
-                  <div className="flex space-x-2 w-max px-1">
-                    {BUSINESS_HOURS.map(time => {
-                      const timeLabel = formatTimeToString(time);
-                      const endTimeLabel = formatTimeToString(`${parseInt(time.split(':')[0])+1}:00`);
-                      const [hours] = time.split(':').map(Number);
-                      const isMorning = hours < 12;
-                      const isBooked = bookedTimesForDate.includes(time);
-                      
-                      return (
-                        <button
-                          key={`mobile-${time}`}
-                          onClick={() => !isBooked && handleTimeSelect(time)}
-                          disabled={isBooked}
-                          title={isBooked ? 
-                            "This time slot is already booked" : 
-                            `Book from ${timeLabel} to ${endTimeLabel}`
-                          }
-                          className={`relative flex-shrink-0 py-3 px-4 text-center rounded-lg border shadow-sm
-                            ${isBooked 
-                              ? 'bg-red-50 text-red-800 border-red-200 cursor-not-allowed shadow-inner' 
-                              : `hover:shadow text-gray-700 border-gray-300 ${isMorning ? 'bg-amber-50/50' : 'bg-blue-50/50'}`
-                            }
-                            ${selectedTime === time 
-                              ? 'bg-blue-100 border-blue-500 ring-1 ring-blue-500 shadow-md' 
-                              : ''
-                            }
-                          `}
-                        >
-                          <div className={`text-sm ${selectedTime === time ? 'font-medium' : ''}`}>{timeLabel}</div>
-                          <div className="text-xs mt-1">
-                            {isMorning 
-                              ? <span className="text-amber-700">Morning</span> 
-                              : <span className="text-blue-700">Afternoon</span>
-                            }
-                          </div>
-                          <div className="text-xs mt-1 text-gray-500">to {endTimeLabel}</div>
-                          {isBooked && (
-                            <div className="absolute -top-1.5 -right-1.5 bg-red-100 text-red-800 text-xs font-bold px-1.5 py-0.5 rounded-md border border-red-200 shadow-sm">
-                              Booked
-                            </div>
-                          )}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            {/* Continue button - only shown when a time is selected */}
-            {selectedTime && (
-              <div className="mt-6">
-                <button
-                  onClick={() => setCurrentStep('form')}
-                  className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                >
-                  Continue to booking details
-                </button>
-              </div>
-            )}
+          </div>
+        )}
+        
+        {/* Continue button - only shown when a time is selected */}
+        {selectedTime && (
+          <div className="mt-6">
+            <button
+              onClick={() => setCurrentStep('form')}
+              className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            >
+              Continue to booking details
+            </button>
           </div>
         )}
       </>

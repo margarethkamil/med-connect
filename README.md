@@ -17,16 +17,23 @@ doctor-booking/
 ├── public/                  # Static assets
 ├── src/
 │   ├── api/                 # API client for backend communication
-│   ├── components/          # Reusable React components (UI, modals, lists, etc.)
-│   ├── pages/               # Top-level pages (Doctors, Appointments, Admin, etc.)
+│   ├── assets/              # Static assets (images, fonts)
+│   ├── components/          # Reusable React components
+│   ├── pages/               # Top-level pages (Doctors, Appointments, Admin)
+│   ├── services/            # Service integrations
+│   │   ├── analytics.ts     # Google Analytics integration
+│   │   ├── seo.ts           # SEO configurations
 │   ├── store/               # Zustand stores for state management
 │   ├── types/               # TypeScript type definitions
+│   ├── App.css              # Main application styles
 │   ├── App.tsx              # Main app layout and routing
+│   ├── index.css            # Global CSS (Tailwind imports)
 │   ├── main.tsx             # App entry point
-│   └── routes.tsx           # Route definitions
+│   ├── routes.tsx           # Route definitions
 ├── README.md
 ├── package.json
 └── ... (config and environment files)
+
 ```
 
 ## Features
